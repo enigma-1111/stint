@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#11110f" />
   <title>Stint — the penny story</title>
-  <meta name="description" content="A shared story on Robinhood Chain. One penny per character. Paid to a published address." />
+  <meta name="description" content="A shared story on Robinhood Chain. One penny per character, paid in USDG." />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -13,7 +13,7 @@
     <header class="top">
       <p class="mark">Stint</p>
       <h1 class="lede">A story anyone can continue. One penny a character.</h1>
-      <p class="sub">Robinhood Chain. Pay USDG to the published address. Not affiliated with Robinhood Markets.</p>
+      <p class="sub">Robinhood Chain. Connect and pay USDG. Not affiliated with Robinhood Markets.</p>
     </header>
 
     <article class="story" id="story" aria-label="The story so far"></article>
@@ -22,18 +22,11 @@
       <label for="line">Your next lines</label>
       <textarea id="line" rows="7" maxlength="800" placeholder="Write what happens next. Spaces count. Minimum 20 characters."></textarea>
       <p class="meter" id="meter">0 characters · $0.00</p>
-
-      <p class="kicker">Pay this address on Robinhood Chain</p>
-      <p class="addr" id="addr">0xB203FAA6207Ce9384D46fa5B9f397D304F17943C</p>
       <div class="row">
-        <button type="button" class="btn" id="copy-addr">Copy address</button>
-        <button type="button" class="btn ghost" id="copy-bankr">Copy Bankr line</button>
+        <button type="button" class="btn" id="connect">Connect</button>
+        <button type="button" class="btn primary" id="pay">Pay USDG</button>
       </div>
-      <button type="button" class="btn primary" id="wallet-send">Pay USDG from wallet</button>
-
-      <label for="hash">Transaction hash</label>
-      <input id="hash" type="text" autocomplete="off" spellcheck="false" placeholder="0x…" />
-      <button type="button" class="btn" id="commit">Add my lines to this device</button>
+      <p class="hint" id="wallet-label"></p>
       <p class="status" id="status" role="status"></p>
     </section>
 
@@ -42,15 +35,10 @@
       <ol>
         <li>Read the story. Write the next passage.</li>
         <li>Every character costs one cent, including spaces and punctuation.</li>
-        <li>Pay that many USDG on Robinhood Chain to the address above. One USDG is one dollar.</li>
-        <li>Paste the hash. Your lines stay on this device until they are folded into the public story.</li>
+        <li>Connect a wallet on Robinhood Chain and pay that many USDG.</li>
       </ol>
-      <p>This is paid writing, not a token and not an investment. Minimum 20 characters. Maximum 800 per turn.</p>
+      <p>This is paid writing, not a token and not an investment. Minimum 20 characters. Maximum 800 per turn. Gas is ETH.</p>
     </section>
-
-    <footer>
-      <p>Payout is only 0xB203FAA6207Ce9384D46fa5B9f397D304F17943C. Gas is ETH. The story fee is USDG.</p>
-    </footer>
   </main>
   <script src="app.js"></script>
 </body>

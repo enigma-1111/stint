@@ -9,10 +9,16 @@ const MAX_CHARS = 800;
 
 const $ = (id) => document.getElementById(id);
 
+let account = "";
+
 function setStatus(text, ok) {
   const el = $("status");
   el.textContent = text;
   el.classList.toggle("ok", Boolean(ok));
+}
+
+function shortAddr(addr) {
+  return addr.slice(0, 6) + "\u2026" + addr.slice(-4);
 }
 
 function charsOf(text) {
@@ -23,13 +29,13 @@ function pennies(text) {
   return charsOf(text) * PENNY;
 }
 
-function bankrLine(text) {
-  const usd = pennies(text).toFixed(2);
-  return `On robinhood chain, send $${usd} of USDG to ${PAYOUT}\nDo not trade. Wait for YES.`;
-}
-
 function pad64(hex) {
   return hex.replace(/^0x/, "").toLowerCase().padStart(64, "0");
+}
+
+function paintWallet() {
+  $("wallet-label").textContent = account ? "Connected " + shortAddr(account) : "";
+  $("connect").textContent = account ? "Connected" : "Connect";
 }
 
 async function usdgDecimals(ethereum) {
@@ -105,7 +111,7 @@ function render(base, extra) {
 
 function paintMeter() {
   const n = charsOf($("line").value);
-  $("meter").textContent = `${n} character${n === 1 ? "" : "s"} · $${(n * PENNY).toFixed(2)}`;
+  $("meter").textContent = `${n} character${n === 1 ? "" : "s"} \u00b7 $${(n * PENNY).toFixed(2)}`;
 }
 
 async function loadStory() {
@@ -119,32 +125,48 @@ async function loadStory() {
   }
 }
 
+function keepLine(text, hash) {
+  const n = charsOf(text);
+  const rows = loadLocal();
+  rows.push({
+    text: text.trim(),
+    hash,
+    chars: n,
+    usd: pennies(text),
+    chain: CHAIN_DEC,
+    savedAt: new Date().toISOString(),
+  });
+  saveLocal(rows);
+  $("line").value = "";
+  paintMeter();
+  loadStory();
+}
+
+function getWallet() {
+  if (!window.ethereum || !window.ethereum.request) {
+    setStatus("No wallet in this browser.");
+    return null;
+  }
+  return window.ethereum;
+}
+
 $("line").addEventListener("input", paintMeter);
 
-$("copy-addr").addEventListener("click", async () => {
+$("connect").addEventListener("click", async () => {
+  const ethereum = getWallet();
+  if (!ethereum) return;
   try {
-    await navigator.clipboard.writeText(PAYOUT);
-    setStatus("Address copied.", true);
-  } catch {
-    setStatus("Copy the address by hand.");
+    await ensureChain(ethereum);
+    const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+    account = (accounts && accounts[0]) || "";
+    paintWallet();
+    setStatus(account ? "Connected on Robinhood Chain." : "No account.", Boolean(account));
+  } catch (err) {
+    setStatus(err && err.message ? err.message : "Connect declined.");
   }
 });
 
-$("copy-bankr").addEventListener("click", async () => {
-  const text = $("line").value;
-  if (charsOf(text) < MIN_CHARS) {
-    setStatus(`Write at least ${MIN_CHARS} characters first.`);
-    return;
-  }
-  try {
-    await navigator.clipboard.writeText(bankrLine(text));
-    setStatus("Bankr line copied. Paste it in Bankr on Robinhood Chain.", true);
-  } catch {
-    setStatus(bankrLine(text));
-  }
-});
-
-$("wallet-send").addEventListener("click", async () => {
+$("pay").addEventListener("click", async () => {
   const text = $("line").value;
   const n = charsOf(text);
   if (n < MIN_CHARS) {
@@ -155,57 +177,35 @@ $("wallet-send").addEventListener("click", async () => {
     setStatus(`Cap is ${MAX_CHARS} characters per turn.`);
     return;
   }
-  const ethereum = window.ethereum;
-  if (!ethereum || !ethereum.request) {
-    setStatus("No wallet here. Copy the Bankr line and pay there.");
-    return;
-  }
+  const ethereum = getWallet();
+  if (!ethereum) return;
   try {
     await ensureChain(ethereum);
     const accounts = await ethereum.request({ method: "eth_requestAccounts" });
-    const from = accounts && accounts[0];
-    if (!from) throw new Error("No account");
+    account = (accounts && accounts[0]) || "";
+    paintWallet();
+    if (!account) throw new Error("No account");
     const dec = await usdgDecimals(ethereum);
     const amt = tokenAmount(n, dec);
     const data = "0xa9059cbb" + pad64(PAYOUT) + pad64("0x" + amt.toString(16));
     const hash = await ethereum.request({
       method: "eth_sendTransaction",
-      params: [{ from, to: USDG, data, chainId: CHAIN_ID }],
+      params: [{ from: account, to: USDG, data, chainId: CHAIN_ID }],
     });
-    $("hash").value = hash;
-    setStatus(`Sent ${pennies(text).toFixed(2)} USDG. Hash filled in. Add your lines.`, true);
+    keepLine(text, hash);
+    setStatus("Paid " + pennies(text).toFixed(2) + " USDG. Your lines are on this device.", true);
   } catch (err) {
-    setStatus(err && err.message ? err.message : "Wallet declined.");
+    setStatus(err && err.message ? err.message : "Payment declined.");
   }
 });
 
-$("commit").addEventListener("click", () => {
-  const text = $("line").value.trim();
-  const hash = $("hash").value.trim();
-  const n = charsOf($("line").value);
-  if (n < MIN_CHARS) {
-    setStatus(`Write at least ${MIN_CHARS} characters.`);
-    return;
-  }
-  if (!hash || !hash.startsWith("0x") || hash.length < 66) {
-    setStatus("Need a full transaction hash before the lines stay.");
-    return;
-  }
-  const rows = loadLocal();
-  rows.push({
-    text,
-    hash,
-    chars: n,
-    usd: pennies($("line").value),
-    chain: CHAIN_DEC,
-    savedAt: new Date().toISOString(),
+if (window.ethereum && window.ethereum.on) {
+  window.ethereum.on("accountsChanged", (accounts) => {
+    account = (accounts && accounts[0]) || "";
+    paintWallet();
   });
-  saveLocal(rows);
-  $("line").value = "";
-  paintMeter();
-  loadStory();
-  setStatus("Saved on this device. Public book updates when the hash is folded in.", true);
-});
+}
 
 paintMeter();
+paintWallet();
 loadStory();
