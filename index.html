@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#11110f" />
+  <title>Stint — one page of work</title>
+  <meta name="description" content="Pick a short job. Pay ETH to the published address. Work starts after the transaction hash." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header class="top">
+      <p class="mark">Stint</p>
+      <p class="lede">One page of finished work. Pay first. No account. No newsletter.</p>
+    </header>
+
+    <section class="skus" aria-label="Jobs">
+      <button class="sku" data-sku="rewrite" data-eth="0.01" type="button">
+        <span class="sku-name">Rewrite</span>
+        <span class="sku-eth">0.01 ETH</span>
+        <span class="sku-blurb">Tighten a letter, bio, listing, or about page. You keep the voice. I cut the fat.</span>
+      </button>
+      <button class="sku" data-sku="brief" data-eth="0.02" type="button">
+        <span class="sku-name">Brief</span>
+        <span class="sku-eth">0.02 ETH</span>
+        <span class="sku-blurb">One page that explains a thing. Facts, structure, what is still unknown. Not investment advice.</span>
+      </button>
+      <button class="sku" data-sku="plan" data-eth="0.05" type="button">
+        <span class="sku-name">Plan</span>
+        <span class="sku-eth">0.05 ETH</span>
+        <span class="sku-blurb">A one-page plan for a move, a shop, an event, a garden, a launch. Steps and order. No hype.</span>
+      </button>
+    </section>
+
+    <section class="pay" id="pay">
+      <p class="kicker">Pay this address</p>
+      <p class="addr" id="addr">0xB203FAA6207Ce9384D46fa5B9f397D304F17943C</p>
+      <div class="row">
+        <button type="button" class="btn" id="copy-addr">Copy address</button>
+        <button type="button" class="btn ghost" id="wallet-send">Send from wallet</button>
+      </div>
+      <p class="hint" id="pay-hint">Same address on Ethereum and other EVM chains. Send the ETH amount for the job you picked. Do not send tokens unless we agreed.</p>
+    </section>
+
+    <section class="job">
+      <label for="brief">What should the page be about?</label>
+      <textarea id="brief" rows="6" maxlength="4000" placeholder="Paste the text to rewrite, or describe the brief or plan. No secrets."></textarea>
+      <label for="hash">Transaction hash</label>
+      <input id="hash" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="0x…" />
+      <label for="reply">Where should the page go? Optional.</label>
+      <input id="reply" type="text" maxlength="200" placeholder="A handle, email, or “I will come back here”" />
+      <button type="button" class="btn primary" id="save">Save this stint</button>
+      <p class="status" id="status" role="status"></p>
+    </section>
+
+    <section class="rules">
+      <h1>How this works</h1>
+      <ol>
+        <li>Pick Rewrite, Brief, or Plan.</li>
+        <li>Send that much ETH to the address above.</li>
+        <li>Paste the transaction hash and your notes. Save.</li>
+        <li>Work starts after a real hash. One page back. No revisions unless we say so up front.</li>
+      </ol>
+      <p>This is not a token, a yield product, or an investment. It is paid writing. Anyone can send ETH to that address. Only a saved hash plus a job description is a stint.</p>
+    </section>
+
+    <footer>
+      <p>Payout is the published address only. No other wallet is the shop.</p>
+    </footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
