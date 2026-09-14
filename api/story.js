@@ -1,24 +1,32 @@
 const fs = require("fs");
 const path = require("path");
-const { extras, cors } = require("./lib");
+const { extras, remoteChapters, mergeBook, cors, OPENING } = require("./lib");
+
 function readJson(name, fallback) {
-  try { return JSON.parse(fs.readFileSync(path.join(process.cwd(), name), "utf8")); }
-  catch { return fallback; }
+  const tries = [
+    path.join(process.cwd(), name),
+    path.join(__dirname, "..", name),
+    path.join(__dirname, name),
+  ];
+  for (const p of tries) {
+    try {
+      return JSON.parse(fs.readFileSync(p, "utf8"));
+    } catch {
+      /* next */
+    }
+  }
+  return fallback;
 }
+
 module.exports = async function handler(req, res) {
   cors(res);
-  if (req.method === "OPTIONS") { res.status(204).end(); return; }
-  const book = readJson("story.json", { paragraphs: [] });
+  if (req.method === "OPTIONS") {
+    res.status(204).end();
+    return;
+  }
+  const book = readJson("story.json", OPENING);
   const extraFile = readJson("chapters.json", { chapters: [] });
-  const live = extras();
-  const seen = new Set();
-  const paragraphs = [];
-  (book.paragraphs || []).forEach((t) => paragraphs.push({ text: t, pending: false }));
-  [].concat(extraFile.chapters || [], live).forEach((row) => {
-    const key = row.hash || row.text;
-    if (seen.has(key)) return;
-    seen.add(key);
-    paragraphs.push({ text: row.text, pending: false, hash: row.hash || "" });
-  });
-  res.status(200).json({ title: book.title || "The road that kept going", count: paragraphs.length, paragraphs });
+  const remote = await remoteChapters();
+  const payload = mergeBook(book, extraFile.chapters || [], remote, extras());
+  res.status(200).json(payload);
 };

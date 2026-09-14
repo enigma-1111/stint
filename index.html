@@ -13,14 +13,18 @@
     <header class="top">
       <p class="mark">Stint</p>
       <h1 class="lede">A story anyone can continue. One penny a character.</h1>
-      <p class="sub">Robinhood Chain. Connect any wallet and pay USDG. Not affiliated with Robinhood Markets.</p>
+      <p class="sub">Robinhood Chain. Connect any wallet and pay USDG. The page reloads when the payment lands. Not affiliated with Robinhood Markets.</p>
     </header>
+
     <section class="tools">
       <input id="search" type="search" placeholder="Search the story" autocomplete="off" />
       <p class="pager" id="pager"></p>
     </section>
+
     <article class="story" id="story" aria-label="The story so far"></article>
+
     <nav class="pages" id="pages"></nav>
+
     <section class="compose">
       <label for="line">Your next lines</label>
       <textarea id="line" rows="7" maxlength="800" placeholder="Write what happens next. Spaces count. Minimum 20 characters."></textarea>
@@ -32,6 +36,7 @@
       <p class="hint" id="wallet-label"></p>
       <p class="status" id="status" role="status"></p>
     </section>
+
     <section class="rules">
       <h2>How the penny works</h2>
       <ol>
@@ -43,6 +48,7 @@
       <p>Several people can pay at once. The chain orders the payments. Minimum 20 characters. Maximum 800 per turn. Gas is ETH.</p>
     </section>
   </main>
+
   <div class="modal" id="modal" hidden>
     <div class="sheet" role="dialog" aria-label="Choose wallet">
       <p class="kicker">Choose a wallet</p>
