@@ -1,6 +1,12 @@
 const { cors } = require("./lib");
 const { quote } = require("./rails");
 
+function param(req, url, key, fallback) {
+  const q = req.query && req.query[key];
+  if (q != null && String(q)) return String(q);
+  return url.searchParams.get(key) || fallback;
+}
+
 module.exports = async function handler(req, res) {
   cors(res);
   if (req.method === "OPTIONS") {
@@ -8,9 +14,9 @@ module.exports = async function handler(req, res) {
     return;
   }
   const url = new URL(req.url, "https://stint-tau.vercel.app");
-  const chars = Math.max(0, parseInt(url.searchParams.get("chars") || req.query && req.query.chars || "0", 10) || 0);
-  const rail = String((req.query && req.query.rail) || url.searchParams.get("rail") || "robinhood");
-  const asset = String((req.query && req.query.asset) || url.searchParams.get("asset") || "");
+  const chars = Math.max(0, parseInt(param(req, url, "chars", "0"), 10) || 0);
+  const rail = param(req, url, "rail", "robinhood");
+  const asset = param(req, url, "asset", "");
   if (chars < 1) {
     res.status(400).json({ ok: false, error: "chars required" });
     return;

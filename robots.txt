@@ -5,6 +5,7 @@ Allow: /agent.txt
 Allow: /humans.txt
 Allow: /api/story
 Allow: /api/spec
+Allow: /api/quote
 Allow: /api/health
 Disallow: /api/contribute
 
