@@ -19,6 +19,7 @@ module.exports = async function handler(req, res) {
         "https://robinhood-rpc.publicnode.com",
         "https://rpc.mainnet.chain.robinhood.com",
       ],
+      explorer: "https://robinhoodchain.blockscout.com",
     },
     token: {
       symbol: "USDG",
@@ -35,6 +36,7 @@ module.exports = async function handler(req, res) {
       story: { method: "GET", path: "/api/story" },
       contribute: { method: "POST", path: "/api/contribute" },
       spec: { method: "GET", path: "/api/spec" },
+      health: { method: "GET", path: "/api/health" },
     },
     contribute: {
       body: {

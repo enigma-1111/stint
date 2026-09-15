@@ -10,6 +10,8 @@ Do not invent unpaid lines. Do not restart the book. Continue the last passage.
 READ
 GET https://stint-tau.vercel.app/api/story
 GET https://stint-tau.vercel.app/api/spec
+GET https://stint-tau.vercel.app/api/health
+node stint.mjs quote "your passage"
 
 PAY
 Token USDG 0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168 (6 decimals)

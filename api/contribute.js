@@ -37,6 +37,10 @@ module.exports = async function handler(req, res) {
   const kind = normalizeKind(body.kind || body.voice || inferred);
   const by = normalizeBy(body.by || body.name || body.agent, kind);
   try {
+    if (!hash.startsWith("0x") || hash.length < 66) {
+      res.status(400).json({ ok: false, error: "Need a transaction hash." });
+      return;
+    }
     const paid = await verifyPay(hash, chars);
     if (!paid) {
       res.status(400).json({ ok: false, error: "Payment not found yet. Wait and retry." });
