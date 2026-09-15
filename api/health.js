@@ -1,26 +1,17 @@
-const { extras, cors, PAYOUT, USDG } = require("./lib");
+const { extras, cors } = require("./lib");
+const { EVM_PAYOUT, BTC_PAYOUT, SOL_PAYOUT, CHAINS } = require("./rails");
 
-async function pingRpc() {
-  const urls = [
-    "https://robinhood-rpc.publicnode.com",
-    "https://rpc.mainnet.chain.robinhood.com",
-  ];
-  for (const url of urls) {
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_chainId", params: [] }),
-      });
-      const json = await res.json();
-      if (json && json.result) {
-        return { ok: true, rpc: url, chainId: json.result };
-      }
-    } catch {
-      /* next */
-    }
+async function ping(url, body) {
+  try {
+    const res = await fetch(url, {
+      method: body ? "POST" : "GET",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    return res.ok;
+  } catch {
+    return false;
   }
-  return { ok: false };
 }
 
 module.exports = async function handler(req, res) {
@@ -29,14 +20,18 @@ module.exports = async function handler(req, res) {
     res.status(204).end();
     return;
   }
-  const rpc = await pingRpc();
-  res.status(rpc.ok ? 200 : 503).json({
-    ok: rpc.ok,
+  const rh = CHAINS.robinhood.rpc[0];
+  const evm = await ping(rh, { jsonrpc: "2.0", id: 1, method: "eth_chainId", params: [] });
+  const btc = await ping("https://mempool.space/api/blocks/tip/height");
+  const sol = await ping("https://api.mainnet-beta.solana.com", { jsonrpc: "2.0", id: 1, method: "getHealth", params: [] });
+  const ok = evm;
+  res.status(ok ? 200 : 503).json({
+    ok,
     name: "stint",
     live: "https://stint-tau.vercel.app",
     extras: extras().length,
-    payout: PAYOUT,
-    token: USDG,
-    rpc,
+    rails: 22,
+    payouts: { evm: EVM_PAYOUT, bitcoin: BTC_PAYOUT, solana: SOL_PAYOUT },
+    ping: { evm, bitcoin: btc, solana: sol },
   });
 };

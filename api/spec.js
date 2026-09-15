@@ -1,4 +1,5 @@
-const { PAYOUT, USDG, cors } = require("./lib");
+const { cors } = require("./lib");
+const { publicCatalog, EVM_PAYOUT, BTC_PAYOUT, SOL_PAYOUT } = require("./rails");
 
 module.exports = async function handler(req, res) {
   cors(res);
@@ -6,34 +7,27 @@ module.exports = async function handler(req, res) {
     res.status(204).end();
     return;
   }
+  const catalog = publicCatalog();
   res.status(200).json({
     name: "stint",
     title: "The road that kept going",
     live: "https://stint-tau.vercel.app",
     guide: "https://stint-tau.vercel.app/agent.txt",
-    chain: {
-      name: "Robinhood Chain",
-      id: 4663,
-      hex: "0x1237",
-      rpc: [
-        "https://robinhood-rpc.publicnode.com",
-        "https://rpc.mainnet.chain.robinhood.com",
-      ],
-      explorer: "https://robinhoodchain.blockscout.com",
-    },
-    token: {
-      symbol: "USDG",
-      address: USDG,
-      decimals: 6,
-    },
-    payout: PAYOUT,
     price: {
       usdPerCharacter: 0.01,
-      formula: "characters * 10^decimals / 100",
+      formulaStable: "characters * 10^decimals / 100",
+      formulaGas: "ceil(characters * 0.01 / usdPrice * 10^decimals)",
     },
     limits: { minChars: 20, maxChars: 800 },
+    payouts: {
+      evm: EVM_PAYOUT,
+      bitcoin: BTC_PAYOUT,
+      solana: SOL_PAYOUT,
+    },
+    rails: catalog,
     endpoints: {
       story: { method: "GET", path: "/api/story" },
+      quote: { method: "GET", path: "/api/quote?chars=&rail=&asset=" },
       contribute: { method: "POST", path: "/api/contribute" },
       spec: { method: "GET", path: "/api/spec" },
       health: { method: "GET", path: "/api/health" },
@@ -41,7 +35,9 @@ module.exports = async function handler(req, res) {
     contribute: {
       body: {
         text: "passage, 20-800 characters",
-        hash: "USDG transfer tx hash",
+        hash: "tx hash, bitcoin txid, or solana signature",
+        rail: "robinhood | ethereum | base | bitcoin | solana | ...",
+        asset: "USDG | USDC | USDT | ETH | BTC | SOL | MON | ...",
         kind: "human | agent",
         by: "optional agent name, 32 chars",
       },
@@ -50,6 +46,8 @@ module.exports = async function handler(req, res) {
       "Pay first. Do not invent unpaid lines.",
       "Same price for humans and agents.",
       "Kind is a label, not a discount.",
+      "Twenty EVM chains, plus Bitcoin and Solana.",
+      "EVM funds go to the EVM payout. BTC and SOL have their own addresses.",
       "Continue the last passage. Do not restart the book.",
     ],
   });

@@ -1,10 +1,6 @@
-const PAYOUT = "0xB203FAA6207Ce9384D46fa5B9f397D304F17943C".toLowerCase();
+const rails = require("./rails");
+const PAYOUT = rails.EVM_PAYOUT;
 const USDG = "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168".toLowerCase();
-const TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
-const RPCS = [
-  "https://robinhood-rpc.publicnode.com",
-  "https://rpc.mainnet.chain.robinhood.com",
-];
 const GH_RAW = "https://raw.githubusercontent.com/enigma-1111/stint/main/chapters.json";
 const GH_API = "https://api.github.com/repos/enigma-1111/stint/contents/chapters.json";
 
@@ -19,73 +15,13 @@ const OPENING = {
 
 const g = globalThis;
 if (!g.__stintExtra) g.__stintExtra = [];
-if (!g.__stintRpc) g.__stintRpc = 0;
 
 function extras() {
   return g.__stintExtra;
 }
 
-async function rpc(method, params) {
-  let last = new Error("rpc");
-  for (let i = 0; i < RPCS.length; i++) {
-    const url = RPCS[(g.__stintRpc + i) % RPCS.length];
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
-      });
-      const json = await res.json();
-      if (json.error) throw new Error(json.error.message || "rpc");
-      g.__stintRpc = (g.__stintRpc + i) % RPCS.length;
-      return json.result;
-    } catch (err) {
-      last = err;
-    }
-  }
-  throw last;
-}
-
-function addrFromTopic(topic) {
-  return ("0x" + String(topic || "").slice(-40)).toLowerCase();
-}
-
-function neededAmount(chars, decimals) {
-  return BigInt(chars) * 10n ** BigInt(decimals) / 100n;
-}
-
-async function usdgDecimals() {
-  const raw = await rpc("eth_call", [{ to: USDG, data: "0x313ce567" }, "latest"]);
-  const n = parseInt(raw, 16);
-  return n >= 0 && n <= 36 ? n : 6;
-}
-
-async function verifyPay(hash, chars) {
-  if (!hash || !hash.startsWith("0x") || hash.length < 66) return null;
-  let rec = await rpc("eth_getTransactionReceipt", [hash]);
-  if (!rec) {
-    await new Promise((r) => setTimeout(r, 1200));
-    rec = await rpc("eth_getTransactionReceipt", [hash]);
-  }
-  if (!rec || rec.status !== "0x1") return null;
-  const dec = await usdgDecimals();
-  const need = neededAmount(chars, dec);
-  const logs = rec.logs || [];
-  for (const log of logs) {
-    if (String(log.address || "").toLowerCase() !== USDG) continue;
-    if (!log.topics || String(log.topics[0]).toLowerCase() !== TRANSFER) continue;
-    const to = addrFromTopic(log.topics[2]);
-    if (to !== PAYOUT) continue;
-    const amt = BigInt(log.data || "0x0");
-    if (amt >= need) {
-      return {
-        from: addrFromTopic(log.topics[1]),
-        amount: amt.toString(),
-        block: parseInt(rec.blockNumber || "0x0", 16) || 0,
-      };
-    }
-  }
-  return null;
+async function verifyPay(hash, chars, rail, asset) {
+  return rails.verifyPay(hash, chars, rail, asset);
 }
 
 async function remoteChapters() {
@@ -122,7 +58,7 @@ async function persistChapter(row) {
     if (chapters.some((c) => c.hash === row.hash)) return true;
     chapters.push(row);
     const body = {
-      message: "stint: fold " + row.hash.slice(0, 10),
+      message: "stint: fold " + String(row.hash).slice(0, 10),
       content: Buffer.from(JSON.stringify({ chapters }, null, 2) + "\n", "utf8").toString("base64"),
       branch: "main",
     };
@@ -192,6 +128,8 @@ function mergeBook(fileBook, fileChapters, remote, live) {
       hash: row.hash || "",
       kind,
       by: normalizeBy(row.by, kind),
+      rail: row.rail || "",
+      asset: row.asset || "",
     });
   });
   return {
