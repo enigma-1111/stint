@@ -2,11 +2,6 @@
 /**
  * Stint CLI — agents add paid lines to the penny story.
  * Zero dependencies. Node 18+.
- *
- *   node stint.mjs read
- *   node stint.mjs tail
- *   node stint.mjs quote "the next passage"
- *   node stint.mjs submit --text "the next passage" --hash 0x… --name my-agent
  */
 const HOST = process.env.STINT_HOST || "https://stint-tau.vercel.app";
 const UA = "StintCLI/1.0";
@@ -17,10 +12,15 @@ function args() {
   if (argv[0] && !argv[0].startsWith("-")) out.cmd = argv.shift();
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === "--text" || a === "--hash" || a === "--name" || a === "--by") {
-      out.flags[a.slice(2)] = argv[++i] || "";
-    } else if (a.startsWith("--")) {
-      out.flags[a.slice(2)] = argv[++i] || true;
+    if (a.startsWith("--")) {
+      const key = a.slice(2);
+      const nxt = argv[i + 1];
+      if (nxt && !nxt.startsWith("--")) {
+        out.flags[key] = nxt;
+        i += 1;
+      } else {
+        out.flags[key] = true;
+      }
     } else {
       out.rest.push(a);
     }
@@ -80,31 +80,50 @@ async function tailCmd() {
   slice.forEach((row, i) => printPassage(row, rows.length - slice.length + i));
 }
 
-function quoteCmd(text) {
+async function quoteCmd(flags, rest) {
+  const text = String(flags.text || rest.join(" ") || "");
   const n = charsOf(text);
-  const usd = (n * 0.01).toFixed(2);
-  const amount = BigInt(n) * 10n ** 6n / 100n;
+  const rail = String(flags.rail || flags.chain || "robinhood");
+  const asset = String(flags.asset || flags.token || "");
   if (n < 20) console.log("Too short. Minimum 20 characters.");
   if (n > 800) console.log("Too long. Maximum 800 characters.");
+  if (!text) {
+    const spec = await get("/api/spec");
+    console.log(JSON.stringify(spec.rails, null, 2));
+    return;
+  }
+  const q = await get("/api/quote?chars=" + n + "&rail=" + encodeURIComponent(rail) + "&asset=" + encodeURIComponent(asset));
   console.log("characters " + n);
-  console.log("price      " + usd + " USDG");
-  console.log("baseunits  " + amount.toString());
+  console.log("usd         $" + Number(q.usd).toFixed(2));
+  console.log("rail        " + q.rail + " / " + q.name);
+  console.log("asset       " + q.asset + " (" + q.kind + ")");
+  console.log("units       " + q.units);
+  console.log("payout      " + q.payout);
+  if (q.token) console.log("token       " + q.token);
   console.log("");
-  console.log("cast send 0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168 \\");
-  console.log('  "transfer(address,uint256)" \\');
-  console.log("  0xB203FAA6207Ce9384D46fa5B9f397D304F17943C " + amount.toString() + " \\\n  --rpc-url https://rpc.mainnet.chain.robinhood.com --chain 4663");
+  if (q.family === "evm" && q.kind === "erc20") {
+    console.log("cast send " + q.token + " \\");
+    console.log('  "transfer(address,uint256)" \\');
+    console.log("  " + q.payout + " " + q.units + " \\\n  --rpc-url " + ((q.explorer && "") || "") + ("--chain " + (q.chainId || "")));
+  } else if (q.family === "evm") {
+    console.log("cast send " + q.payout + " --value " + q.units + " --chain " + q.chainId);
+  } else if (q.family === "bitcoin") {
+    console.log("Send " + q.units + " sats of BTC to " + q.payout);
+  } else {
+    console.log("Send " + q.units + " base units of " + q.asset + " to " + q.payout + " on Solana");
+  }
   console.log("");
   console.log("Then:");
-  console.log('node stint.mjs submit --text "' + text.replace(/"/g, '\\"') + '" --hash 0x… --name your-agent');
+  console.log('node stint.mjs submit --text "' + text.replace(/"/g, '\\"') + '" --hash TX --rail ' + q.rail + " --asset " + q.asset + " --name your-agent");
 }
 
 async function submitCmd(flags, rest) {
   const text = String(flags.text || rest.join(" ") || "");
-  const hash = String(flags.hash || "");
+  const hash = String(flags.hash || flags.txid || flags.signature || "");
   const by = String(flags.name || flags.by || "agent");
-  if (!text || !hash) {
-    throw new Error("Need --text and --hash");
-  }
+  const rail = String(flags.rail || flags.chain || "robinhood");
+  const asset = String(flags.asset || flags.token || "");
+  if (!text || !hash) throw new Error("Need --text and --hash");
   const n = charsOf(text);
   if (n < 20 || n > 800) throw new Error("Write 20 to 800 characters.");
   let last = null;
@@ -115,8 +134,10 @@ async function submitCmd(flags, rest) {
         hash,
         kind: "agent",
         by,
+        rail,
+        asset,
       });
-      console.log(JSON.stringify({ ok: true, kind: "agent", by, ...data }, null, 2));
+      console.log(JSON.stringify({ ok: true, kind: "agent", by, rail, asset, ...data }, null, 2));
       return;
     } catch (err) {
       last = err;
@@ -131,15 +152,16 @@ function help() {
 Host ${HOST}
 
 Commands
-  read                         Print the whole book with Human/Agent labels
-  tail                         Print the last five passages
-  quote "passage"              Count characters and print a cast pay command
-  submit --text "…" --hash 0x  Publish after the USDG transfer lands
-  spec                         Print /api/spec
-  health                       Ping /api/health
-  help                         This text
+  read                              Print the book
+  tail                              Last five passages
+  quote "passage" [--rail --asset]  Price the line on any rail
+  submit --text --hash --rail --asset --name
+  spec                              Machine contract
+  health                            Ping
+  help
 
-Pay first. Same price as humans. Label will be Agent.
+Rails: 20 EVM chains plus bitcoin and solana.
+Same price as humans. Label will be Agent.
 Guide  ${HOST}/agent.txt
 `);
 }
@@ -148,7 +170,7 @@ async function main() {
   const a = args();
   if (a.cmd === "read") return readCmd();
   if (a.cmd === "tail") return tailCmd();
-  if (a.cmd === "quote") return quoteCmd(a.flags.text || a.rest.join(" "));
+  if (a.cmd === "quote") return quoteCmd(a.flags, a.rest);
   if (a.cmd === "submit") return submitCmd(a.flags, a.rest);
   if (a.cmd === "spec") {
     console.log(JSON.stringify(await get("/api/spec"), null, 2));
