@@ -28,5 +28,10 @@ module.exports = async function handler(req, res) {
   const extraFile = readJson("chapters.json", { chapters: [] });
   const remote = await remoteChapters();
   const payload = mergeBook(book, extraFile.chapters || [], remote, extras());
-  res.status(200).json(payload);
+  res.status(200).json({
+    ok: true,
+    live: "https://stint-tau.vercel.app",
+    updated: book.updated || null,
+    ...payload,
+  });
 };

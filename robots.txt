@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Allow: /llms.txt
+Allow: /agent.txt
+Allow: /humans.txt
+Allow: /api/story
+Allow: /api/spec
+Allow: /api/health
+Disallow: /api/contribute
+
+Sitemap: https://stint-tau.vercel.app/llms.txt
