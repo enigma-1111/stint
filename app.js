@@ -1,7 +1,7 @@
 const PAYOUT = "0xB203FAA6207Ce9384D46fa5B9f397D304F17943C";
 const USDG = "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168";
 const CHAIN_ID = "0x1237";
-const STORE = "stint.story.v1";
+const STORE = "stint.story.v2";
 const PENNY = 0.01;
 const MIN_CHARS = 20;
 const MAX_CHARS = 800;
@@ -12,64 +12,56 @@ const OPENING = [
   "A traveler walked it with one coin in a pocket and a story that was not finished. Every few miles a stranger would add a sentence, then vanish into the dark as if the dark had paid them.",
   "Tonight the road is waiting again. The next voice costs a penny a letter. Write carefully. The trees are listening.",
 ];
-
 const $ = (id) => document.getElementById(id);
-
 let account = "";
 let provider = null;
 let discovered = new Map();
 let paragraphs = [];
 let page = 1;
 let query = "";
+let kindFilter = "all";
 let paying = false;
 let burstTimer = 0;
-
 function setStatus(text, ok) {
   const el = $("status");
   el.textContent = text;
   el.classList.toggle("ok", Boolean(ok));
 }
-
-function shortAddr(addr) {
-  return addr.slice(0, 6) + "…" + addr.slice(-4);
+function shortAddr(addr) { return addr.slice(0, 6) + "\u2026" + addr.slice(-4); }
+function charsOf(text) { return Array.from(text).length; }
+function pennies(text) { return charsOf(text) * PENNY; }
+function pad64(hex) { return hex.replace(/^0x/, "").toLowerCase().padStart(64, "0"); }
+function kindOf(row) {
+  const k = String((row && row.kind) || "").toLowerCase();
+  if (k === "agent") return "agent";
+  if (k === "opening") return "opening";
+  return "human";
 }
-
-function charsOf(text) {
-  return Array.from(text).length;
-}
-
-function pennies(text) {
-  return charsOf(text) * PENNY;
-}
-
-function pad64(hex) {
-  return hex.replace(/^0x/, "").toLowerCase().padStart(64, "0");
-}
-
 function paintWallet() {
   $("wallet-label").textContent = account ? "Connected " + shortAddr(account) : "";
   $("connect").textContent = account ? "Connected" : "Connect";
   $("pay").disabled = paying;
   $("connect").disabled = paying;
 }
-
 function filtered() {
   const q = query.trim().toLowerCase();
-  if (!q) return paragraphs;
-  return paragraphs.filter((p) => String(p.text || "").toLowerCase().includes(q));
+  return paragraphs.filter((p) => {
+    const kind = kindOf(p);
+    if (kindFilter === "human" && kind !== "human") return false;
+    if (kindFilter === "agent" && kind !== "agent") return false;
+    if (q && !String(p.text || "").toLowerCase().includes(q)) return false;
+    return true;
+  });
 }
-
 function highlight(src, q) {
   const p = document.createElement("p");
+  p.className = "body";
   const low = src.toLowerCase();
   const needle = q.toLowerCase();
   let i = 0;
   while (i < src.length) {
     const hit = low.indexOf(needle, i);
-    if (hit < 0) {
-      p.appendChild(document.createTextNode(src.slice(i)));
-      break;
-    }
+    if (hit < 0) { p.appendChild(document.createTextNode(src.slice(i))); break; }
     if (hit > i) p.appendChild(document.createTextNode(src.slice(i, hit)));
     const mark = document.createElement("mark");
     mark.className = "mark-hit";
@@ -79,7 +71,6 @@ function highlight(src, q) {
   }
   return p;
 }
-
 function renderStory() {
   const rows = filtered();
   const pages = Math.max(1, Math.ceil(rows.length / PAGE));
@@ -91,19 +82,42 @@ function renderStory() {
   root.innerHTML = "";
   if (!slice.length) {
     const p = document.createElement("p");
-    p.textContent = query ? "No lines match that search." : "The story is still opening.";
+    p.textContent = query || kindFilter !== "all" ? "No lines match that filter." : "The story is still opening.";
     root.appendChild(p);
   } else {
     slice.forEach((row) => {
-      const p = query ? highlight(String(row.text || ""), query) : document.createElement("p");
-      if (!query) p.textContent = row.text;
-      if (row.pending) p.classList.add("pending");
-      root.appendChild(p);
+      const wrap = document.createElement("div");
+      wrap.className = "passage" + (row.pending ? " pending" : "");
+      const kind = kindOf(row);
+      const meta = document.createElement("p");
+      meta.className = "meta";
+      const badge = document.createElement("span");
+      badge.className = "badge " + kind;
+      badge.textContent = kind === "agent" ? "Agent" : kind === "opening" ? "Opening" : "Human";
+      meta.appendChild(badge);
+      if (row.by && kind !== "opening") meta.appendChild(document.createTextNode(row.by));
+      wrap.appendChild(meta);
+      if (query) wrap.appendChild(highlight(String(row.text || ""), query));
+      else {
+        const body = document.createElement("p");
+        body.className = "body";
+        body.textContent = row.text;
+        wrap.appendChild(body);
+      }
+      root.appendChild(wrap);
     });
   }
-  $("pager").textContent = rows.length
-    ? "Page " + page + " of " + pages + " · " + rows.length + " passages"
+  const humans = paragraphs.filter((p) => kindOf(p) === "human").length;
+  const agents = paragraphs.filter((p) => kindOf(p) === "agent").length;
+  $("pager").textContent = paragraphs.length
+    ? "Page " + page + " of " + pages + " \u00b7 " + rows.length + " shown \u00b7 " + humans + " human \u00b7 " + agents + " agent"
     : "";
+  const last = paragraphs[paragraphs.length - 1];
+  if ($("tail")) {
+    $("tail").textContent = last && last.text
+      ? "The story ends: \u201c" + String(last.text).slice(0, 180) + (last.text.length > 180 ? "\u2026" : "") + "\u201d"
+      : "";
+  }
   const nav = $("pages");
   nav.innerHTML = "";
   if (pages <= 1) return;
@@ -127,19 +141,10 @@ function renderStory() {
   if (page < pages) add("Next", page + 1, false);
   if (page < pages) add("Last", pages, false);
 }
-
 function localRows() {
-  try {
-    return JSON.parse(localStorage.getItem(STORE) || "[]");
-  } catch {
-    return [];
-  }
+  try { return JSON.parse(localStorage.getItem(STORE) || "[]"); } catch { return []; }
 }
-
-function saveLocal(rows) {
-  localStorage.setItem(STORE, JSON.stringify(rows));
-}
-
+function saveLocal(rows) { localStorage.setItem(STORE, JSON.stringify(rows)); }
 function mergeRows(remote) {
   const seen = new Set();
   const out = [];
@@ -147,69 +152,49 @@ function mergeRows(remote) {
     const text = String(row.text || "");
     if (!text || seen.has(text)) return;
     seen.add(text);
-    out.push({ text, pending: false, hash: row.hash || "" });
+    out.push({ text, pending: false, hash: row.hash || "", kind: kindOf(row), by: row.by || "" });
   });
   localRows().forEach((row) => {
     const text = String(row.text || "");
     if (!text || seen.has(text)) return;
     seen.add(text);
-    out.push({ text, pending: true, hash: row.hash || "" });
+    out.push({ text, pending: true, hash: row.hash || "", kind: kindOf(row) || "human", by: row.by || "" });
   });
   return out;
 }
-
 async function fetchJson(url) {
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error("bad " + url);
   return res.json();
 }
-
 async function loadStory(goLast) {
   let remote = [];
-  try {
-    const data = await fetchJson("/api/story?t=" + Date.now());
-    remote = data.paragraphs || [];
-  } catch {
-    remote = [];
-  }
+  try { remote = (await fetchJson("/api/story?t=" + Date.now())).paragraphs || []; } catch { remote = []; }
   if (!remote.length) {
     try {
       const data = await fetchJson("story.json?t=" + Date.now());
-      remote = (data.paragraphs || []).map((text) => ({ text, pending: false }));
+      remote = (data.paragraphs || []).map((text) => ({ text, pending: false, kind: "opening" }));
     } catch {
-      remote = OPENING.map((text) => ({ text, pending: false }));
+      remote = OPENING.map((text) => ({ text, pending: false, kind: "opening" }));
     }
   }
-  if (!remote.length) remote = OPENING.map((text) => ({ text, pending: false }));
+  if (!remote.length) remote = OPENING.map((text) => ({ text, pending: false, kind: "opening" }));
   paragraphs = mergeRows(remote);
   if (goLast) page = Math.max(1, Math.ceil(filtered().length / PAGE));
   renderStory();
 }
-
 async function usdgDecimals(eth) {
   try {
-    const raw = await eth.request({
-      method: "eth_call",
-      params: [{ to: USDG, data: "0x313ce567" }, "latest"],
-    });
+    const raw = await eth.request({ method: "eth_call", params: [{ to: USDG, data: "0x313ce567" }, "latest"] });
     const n = parseInt(raw, 16);
     if (n >= 0 && n <= 36) return n;
-  } catch {
-    /* ignore */
-  }
+  } catch {}
   return 6;
 }
-
-function tokenAmount(chars, decimals) {
-  return BigInt(chars) * 10n ** BigInt(decimals) / 100n;
-}
-
+function tokenAmount(chars, decimals) { return BigInt(chars) * 10n ** BigInt(decimals) / 100n; }
 async function ensureChain(eth) {
   try {
-    await eth.request({
-      method: "wallet_switchEthereumChain",
-      params: [{ chainId: CHAIN_ID }],
-    });
+    await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN_ID }] });
   } catch (err) {
     if (err && (err.code === 4902 || /unrecognized/i.test(String(err.message || "")))) {
       await eth.request({
@@ -218,10 +203,7 @@ async function ensureChain(eth) {
           chainId: CHAIN_ID,
           chainName: "Robinhood Chain",
           nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-          rpcUrls: [
-            "https://rpc.mainnet.chain.robinhood.com",
-            "https://robinhood-rpc.publicnode.com",
-          ],
+          rpcUrls: ["https://rpc.mainnet.chain.robinhood.com", "https://robinhood-rpc.publicnode.com"],
           blockExplorerUrls: ["https://explorer.robinhood.com"],
         }],
       });
@@ -230,7 +212,6 @@ async function ensureChain(eth) {
     throw err;
   }
 }
-
 async function waitReceipt(eth, hash) {
   for (let i = 0; i < 50; i++) {
     try {
@@ -244,17 +225,10 @@ async function waitReceipt(eth, hash) {
   }
   throw new Error("Payment is still pending. Keep this page open.");
 }
-
 async function publish(text, hash) {
   const rows = localRows();
   if (!rows.some((r) => r.hash === hash)) {
-    rows.push({
-      text: text.trim(),
-      hash,
-      chars: charsOf(text),
-      usd: pennies(text),
-      savedAt: new Date().toISOString(),
-    });
+    rows.push({ text: text.trim(), hash, chars: charsOf(text), usd: pennies(text), kind: "human", by: "", savedAt: new Date().toISOString() });
     saveLocal(rows);
   }
   let last = null;
@@ -263,7 +237,7 @@ async function publish(text, hash) {
       const res = await fetch("/api/contribute", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ text, hash }),
+        body: JSON.stringify({ text, hash, kind: "human" }),
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.ok) return data;
@@ -275,7 +249,6 @@ async function publish(text, hash) {
   }
   if (last) throw new Error(last);
 }
-
 function mobileLinks() {
   const url = encodeURIComponent(HERE);
   const host = HERE.replace(/^https?:\/\//, "");
@@ -287,20 +260,15 @@ function mobileLinks() {
     { name: "Phantom", href: "https://phantom.app/ul/browse/" + url + "?ref=" + url },
   ];
 }
-
 function rememberProvider(eth) {
   if (!eth || !eth.request) return;
   provider = eth;
   if (eth.on && !eth.__stintBound) {
     eth.__stintBound = true;
-    eth.on("accountsChanged", (accounts) => {
-      account = (accounts && accounts[0]) || "";
-      paintWallet();
-    });
+    eth.on("accountsChanged", (accounts) => { account = (accounts && accounts[0]) || ""; paintWallet(); });
     eth.on("chainChanged", () => {});
   }
 }
-
 function collectWallets() {
   const list = [];
   const seen = new Set();
@@ -332,7 +300,6 @@ function collectWallets() {
   add(window.trustwallet, "Trust Wallet");
   return list;
 }
-
 function paintModal() {
   const box = $("wallet-list");
   box.innerHTML = "";
@@ -359,16 +326,8 @@ function paintModal() {
     box.appendChild(a);
   });
 }
-
-function openModal() {
-  paintModal();
-  $("modal").hidden = false;
-}
-
-function closeModal() {
-  $("modal").hidden = true;
-}
-
+function openModal() { paintModal(); $("modal").hidden = false; }
+function closeModal() { $("modal").hidden = true; }
 async function connectWith(eth, name) {
   rememberProvider(eth);
   try {
@@ -382,7 +341,6 @@ async function connectWith(eth, name) {
     setStatus(err && err.message ? err.message : "Connect declined.");
   }
 }
-
 function startBurst() {
   clearInterval(burstTimer);
   let n = 0;
@@ -392,27 +350,31 @@ function startBurst() {
     if (n >= 24) clearInterval(burstTimer);
   }, 2500);
 }
-
 window.addEventListener("eip6963:announceProvider", (event) => {
   const detail = event.detail || {};
-  const info = detail.info;
-  const p = detail.provider;
-  if (!info || !p) return;
-  discovered.set(info.uuid || info.rdns || info.name, { info, provider: p });
+  if (!detail.info || !detail.provider) return;
+  discovered.set(detail.info.uuid || detail.info.rdns || detail.info.name, { info: detail.info, provider: detail.provider });
 });
 window.dispatchEvent(new Event("eip6963:requestProvider"));
-
 $("line").addEventListener("input", () => {
   const n = charsOf($("line").value);
-  $("meter").textContent = n + " characters · $" + (n * PENNY).toFixed(2);
+  $("meter").textContent = n + " characters \u00b7 $" + (n * PENNY).toFixed(2);
 });
-
-$("search").addEventListener("input", () => {
-  query = $("search").value;
-  page = 1;
+$("search").addEventListener("input", () => { query = $("search").value; page = 1; renderStory(); });
+document.querySelectorAll("#chips .chip").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    kindFilter = btn.getAttribute("data-kind") || "all";
+    document.querySelectorAll("#chips .chip").forEach((b) => b.classList.toggle("on", b === btn));
+    page = 1;
+    renderStory();
+  });
+});
+const latest = $("latest");
+if (latest) latest.addEventListener("click", () => {
+  page = Math.max(1, Math.ceil(filtered().length / PAGE));
   renderStory();
+  $("story").scrollIntoView({ block: "end", behavior: "smooth" });
 });
-
 $("connect").addEventListener("click", () => {
   const wallets = collectWallets();
   if (wallets.length === 1 && !/iPhone|iPad|Android/i.test(navigator.userAgent)) {
@@ -421,31 +383,17 @@ $("connect").addEventListener("click", () => {
   }
   openModal();
 });
-
 $("modal-close").addEventListener("click", closeModal);
-$("modal").addEventListener("click", (e) => {
-  if (e.target.id === "modal") closeModal();
-});
-
+$("modal").addEventListener("click", (e) => { if (e.target.id === "modal") closeModal(); });
 $("pay").addEventListener("click", async () => {
   if (paying) return;
   const text = $("line").value;
   const n = charsOf(text);
-  if (n < MIN_CHARS) {
-    setStatus("Write at least " + MIN_CHARS + " characters.");
-    return;
-  }
-  if (n > MAX_CHARS) {
-    setStatus("Cap is " + MAX_CHARS + " characters per turn.");
-    return;
-  }
+  if (n < MIN_CHARS) { setStatus("Write at least " + MIN_CHARS + " characters."); return; }
+  if (n > MAX_CHARS) { setStatus("Cap is " + MAX_CHARS + " characters per turn."); return; }
   const wallets = collectWallets();
   const eth = provider || (wallets[0] && wallets[0].provider);
-  if (!eth || !eth.request) {
-    openModal();
-    setStatus("Connect a wallet first.");
-    return;
-  }
+  if (!eth || !eth.request) { openModal(); setStatus("Connect a wallet first."); return; }
   rememberProvider(eth);
   paying = true;
   paintWallet();
@@ -459,19 +407,16 @@ $("pay").addEventListener("click", async () => {
     const dec = await usdgDecimals(eth);
     const amt = tokenAmount(n, dec);
     const data = "0xa9059cbb" + pad64(PAYOUT) + pad64("0x" + amt.toString(16));
-    const hash = await eth.request({
-      method: "eth_sendTransaction",
-      params: [{ from: account, to: USDG, data, chainId: CHAIN_ID }],
-    });
-    setStatus("Waiting for the payment to land…");
+    const hash = await eth.request({ method: "eth_sendTransaction", params: [{ from: account, to: USDG, data, chainId: CHAIN_ID }] });
+    setStatus("Waiting for the payment to land\u2026");
     await waitReceipt(eth, hash);
-    setStatus("Payment landed. Publishing your lines…");
+    setStatus("Payment landed. Publishing your lines\u2026");
     await publish(text, hash);
     $("line").value = "";
-    $("meter").textContent = "0 characters · $0.00";
+    $("meter").textContent = "0 characters \u00b7 $0.00";
     await loadStory(true);
     startBurst();
-    setStatus("Paid " + pennies(text).toFixed(2) + " USDG. Story reloaded.", true);
+    setStatus("Paid " + pennies(text).toFixed(2) + " USDG. Story reloaded as Human.", true);
   } catch (err) {
     setStatus(err && err.message ? err.message : "Payment declined.");
   } finally {
@@ -479,12 +424,8 @@ $("pay").addEventListener("click", async () => {
     paintWallet();
   }
 });
-
-document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible") loadStory(false);
-});
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") loadStory(false); });
 window.addEventListener("pageshow", () => loadStory(false));
 setInterval(() => loadStory(false), 8000);
-
 paintWallet();
 loadStory(false);
