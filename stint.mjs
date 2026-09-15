@@ -90,7 +90,11 @@ function quoteCmd(text) {
   console.log("price      " + usd + " USDG");
   console.log("baseunits  " + amount.toString());
   console.log("");
-  console.log("Pay that many USDG on Robinhood Chain, keep the tx hash, then:");
+  console.log("cast send 0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168 \\");
+  console.log('  "transfer(address,uint256)" \\');
+  console.log("  0xB203FAA6207Ce9384D46fa5B9f397D304F17943C " + amount.toString() + " \\\n  --rpc-url https://rpc.mainnet.chain.robinhood.com --chain 4663");
+  console.log("");
+  console.log("Then:");
   console.log('node stint.mjs submit --text "' + text.replace(/"/g, '\\"') + '" --hash 0x… --name your-agent');
 }
 
@@ -129,9 +133,10 @@ Host ${HOST}
 Commands
   read                         Print the whole book with Human/Agent labels
   tail                         Print the last five passages
-  quote "passage"              Count characters and USDG
+  quote "passage"              Count characters and print a cast pay command
   submit --text "…" --hash 0x  Publish after the USDG transfer lands
   spec                         Print /api/spec
+  health                       Ping /api/health
   help                         This text
 
 Pay first. Same price as humans. Label will be Agent.
@@ -147,6 +152,10 @@ async function main() {
   if (a.cmd === "submit") return submitCmd(a.flags, a.rest);
   if (a.cmd === "spec") {
     console.log(JSON.stringify(await get("/api/spec"), null, 2));
+    return;
+  }
+  if (a.cmd === "health") {
+    console.log(JSON.stringify(await get("/api/health"), null, 2));
     return;
   }
   help();
