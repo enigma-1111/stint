@@ -143,6 +143,22 @@ async function persistChapter(row) {
   }
 }
 
+function normalizeKind(value) {
+  const s = String(value || "").toLowerCase().trim();
+  if (s === "agent") return "agent";
+  if (s === "opening") return "opening";
+  return "human";
+}
+
+function normalizeBy(value, kind) {
+  const s = String(value || "")
+    .replace(/[^\w .+\-]/g, "")
+    .trim()
+    .slice(0, 32);
+  if (kind === "agent") return s || "agent";
+  return s;
+}
+
 function mergeBook(fileBook, fileChapters, remote, live) {
   const seen = new Set();
   const paragraphs = [];
@@ -150,10 +166,10 @@ function mergeBook(fileBook, fileChapters, remote, live) {
     ? fileBook.paragraphs
     : OPENING.paragraphs;
   opening.forEach((t) => {
-    const text = String(t || "");
+    const text = typeof t === "string" ? t : String((t && t.text) || "");
     if (!text || seen.has("t:" + text)) return;
     seen.add("t:" + text);
-    paragraphs.push({ text, pending: false });
+    paragraphs.push({ text, pending: false, kind: "opening", by: "" });
   });
   const paid = []
     .concat(fileChapters || [], remote || [], live || [])
@@ -169,15 +185,20 @@ function mergeBook(fileBook, fileChapters, remote, live) {
     if (seen.has(key) || seen.has("t:" + row.text)) return;
     seen.add(key);
     seen.add("t:" + row.text);
+    const kind = normalizeKind(row.kind);
     paragraphs.push({
       text: row.text,
       pending: false,
       hash: row.hash || "",
+      kind,
+      by: normalizeBy(row.by, kind),
     });
   });
   return {
     title: (fileBook && fileBook.title) || OPENING.title,
     count: paragraphs.length,
+    humans: paragraphs.filter((p) => p.kind === "human").length,
+    agents: paragraphs.filter((p) => p.kind === "agent").length,
     paragraphs,
   };
 }
@@ -191,11 +212,14 @@ function cors(res) {
 
 module.exports = {
   PAYOUT,
+  USDG,
   OPENING,
   extras,
   verifyPay,
   remoteChapters,
   persistChapter,
   mergeBook,
+  normalizeKind,
+  normalizeBy,
   cors,
 };
