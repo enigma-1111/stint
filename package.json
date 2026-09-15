@@ -5,6 +5,5 @@
   "description": "Shared penny story on Robinhood Chain",
   "bin": {
     "stint": "./stint.mjs"
-  },
-  "type": "module"
+  }
 }
