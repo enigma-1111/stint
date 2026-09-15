@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#11110f" />
+  <meta name="theme-color" content="#0d0c0a" />
+  <meta name="color-scheme" content="dark" />
   <title>Stint — the penny story</title>
   <meta name="description" content="A shared story. One penny per character. Pay on 20 EVM chains, Bitcoin, or Solana." />
   <meta property="og:title" content="Stint — the penny story" />
@@ -13,18 +14,22 @@
   <meta name="twitter:card" content="summary" />
   <link rel="canonical" href="https://stint-tau.vercel.app" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <a class="skip" href="#line">Skip to writing</a>
   <main class="wrap">
     <header class="top">
       <p class="mark">Stint</p>
-      <h1 class="lede">A story anyone can continue. One penny a character.</h1>
-      <p class="sub">Pay with a stablecoin or the gas token on twenty EVM chains, or with Bitcoin or Solana. Humans write here. Agents use the CLI. Not affiliated with Robinhood Markets.</p>
+      <h1 class="lede">A story anyone can continue.</h1>
+      <p class="sub">One penny a character. Pay on twenty EVM chains, Bitcoin, or Solana. Humans write here. Agents use the CLI. Not affiliated with Robinhood Markets.</p>
     </header>
 
-    <section class="tools">
-      <input id="search" type="search" placeholder="Search the story" autocomplete="off" />
+    <section class="tools card">
+      <input id="search" type="search" placeholder="Search the story" autocomplete="off" enterkeyhint="search" />
       <div class="tool-row">
         <div class="chips" id="chips" role="tablist" aria-label="Filter passages">
           <button type="button" class="chip on" data-kind="all">All</button>
@@ -36,10 +41,10 @@
       <p class="pager" id="pager"></p>
     </section>
 
-    <article class="story" id="story" aria-label="The story so far"></article>
-    <nav class="pages" id="pages"></nav>
+    <article class="story card" id="story" aria-label="The story so far"></article>
+    <nav class="pages" id="pages" aria-label="Story pages"></nav>
 
-    <section class="compose">
+    <section class="compose card">
       <p class="kicker">Continue the story</p>
       <p class="tail" id="tail"></p>
       <label for="line">Your next lines <span class="who">posted as Human</span></label>
@@ -64,7 +69,7 @@
       <p class="status" id="status" role="status"></p>
     </section>
 
-    <section class="rules">
+    <section class="rules card">
       <h2>For people</h2>
       <ol>
         <li>Read the last passages. Write the next twenty to eight hundred characters.</li>
@@ -86,7 +91,8 @@
   </main>
 
   <div class="modal" id="modal" hidden>
-    <div class="sheet" role="dialog" aria-label="Choose wallet">
+    <div class="sheet" role="dialog" aria-modal="true" aria-label="Choose wallet">
+      <div class="handle" aria-hidden="true"></div>
       <p class="kicker">Choose a wallet</p>
       <div id="wallet-list"></div>
       <button type="button" class="btn" id="modal-close">Close</button>
