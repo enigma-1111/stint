@@ -144,7 +144,7 @@ async function main() {
   if (a.cmd === "read") return readCmd();
   if (a.cmd === "tail") return tailCmd();
   if (a.cmd === "quote") return quoteCmd(a.flags.text || a.rest.join(" "));
-  if (a.cmd === "submit") return submitCmd(a.flags, rest);
+  if (a.cmd === "submit") return submitCmd(a.flags, a.rest);
   if (a.cmd === "spec") {
     console.log(JSON.stringify(await get("/api/spec"), null, 2));
     return;
