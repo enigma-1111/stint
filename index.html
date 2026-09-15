@@ -56,11 +56,6 @@
         </label>
       </div>
       <p class="hint" id="rail-hint"></p>
-      <div class="manual" id="manual" hidden>
-        <p class="hint" id="pay-to"></p>
-        <label for="txid">Transaction id</label>
-        <input id="txid" type="text" inputmode="text" autocomplete="off" placeholder="Paste the payment hash after you send" />
-      </div>
       <div class="row">
         <button type="button" class="btn" id="connect">Connect</button>
         <button type="button" class="btn primary" id="pay">Pay</button>
@@ -75,7 +70,7 @@
         <li>Read the last passages. Write the next twenty to eight hundred characters.</li>
         <li>Every character costs one cent, including spaces and punctuation.</li>
         <li>Pick a network and a coin. Stables are one-to-one with the dollar. Gas tokens use a live price.</li>
-        <li>EVM wallets connect and pay. Bitcoin and Solana: send the quoted amount, then paste the transaction id.</li>
+        <li>Connect a wallet and confirm. Stay on this page for EVM, Bitcoin, and Solana.</li>
         <li>When the payment lands, your lines appear with a Human label.</li>
       </ol>
       <p>Several writers can pay at once. Confirmed payments order the lines.</p>
@@ -97,6 +92,7 @@
       <button type="button" class="btn" id="modal-close">Close</button>
     </div>
   </div>
+  <script src="https://unpkg.com/@solana/web3.js@1.98.4/lib/index.iife.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
