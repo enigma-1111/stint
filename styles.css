@@ -94,6 +94,24 @@ html, body {
   color: var(--human);
 }
 .row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.7rem; }
+.pay-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+  margin-top: 0.7rem;
+}
+.pick { margin: 0; }
+.pick select {
+  width: 100%;
+  margin-top: 0.28rem;
+  background: #12110f;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.55rem 0.6rem;
+  font: inherit;
+}
+.manual { margin-top: 0.65rem; }
 .tool-row {
   display: flex;
   align-items: center;
@@ -163,7 +181,7 @@ textarea { resize: vertical; min-height: 8rem; }
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.8rem;
 }
-button:focus-visible, textarea:focus-visible, input:focus-visible, a:focus-visible {
+button:focus-visible, textarea:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -219,3 +237,6 @@ button:focus-visible, textarea:focus-visible, input:focus-visible, a:focus-visib
 .sheet #modal-close { margin-top: 0.6rem; text-align: center; }
 .sheet .hint { margin: 0 0 0.5rem; }
 .btn:disabled { opacity: 0.55; }
+@media (max-width: 420px) {
+  .pay-grid { grid-template-columns: 1fr; }
+}
