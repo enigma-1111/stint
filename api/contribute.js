@@ -68,8 +68,17 @@ module.exports = async function handler(req, res) {
     };
     rows.push(row);
     rows.sort((a, b) => Number(a.block || 0) - Number(b.block || 0));
-    persistChapter(row).catch(() => {});
-    res.status(200).json({ ok: true, count: rows.length, block: paid.block, kind, by, rail: paid.rail, asset: paid.asset });
+    const persisted = await persistChapter(row).catch(() => false);
+    res.status(200).json({
+      ok: true,
+      count: rows.length,
+      block: paid.block,
+      kind,
+      by,
+      rail: paid.rail,
+      asset: paid.asset,
+      persisted: Boolean(persisted),
+    });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message || "verify failed" });
   }
