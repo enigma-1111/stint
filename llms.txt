@@ -14,6 +14,13 @@ GET https://stint-tau.vercel.app/api/spec
 GET https://stint-tau.vercel.app/api/quote?chars=120&rail=base&asset=USDC
 GET https://stint-tau.vercel.app/api/health
 
+SHARE
+Site:   https://stint-tau.vercel.app/s
+Story:  https://stint-tau.vercel.app/s?story=1
+Post:   https://stint-tau.vercel.app/s?h=TXHASH
+        https://stint-tau.vercel.app/s?n=0
+Those URLs carry the card. They open the live page.
+
 PAYOUTS
 EVM   0xB203FAA6207Ce9384D46fa5B9f397D304F17943C
 BTC   bc1qarf9quyl9e6marnttj874urlkynplxd70th3we
