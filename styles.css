@@ -70,6 +70,29 @@ button { cursor: pointer; }
   color: var(--mute);
   font-size: 0.98rem;
 }
+.share-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.85rem;
+}
+.share-btn {
+  min-height: 32px;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--mute);
+  font-family: var(--ui);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.passage.focus {
+  outline: 1px solid rgba(228, 184, 106, 0.45);
+  outline-offset: 8px;
+  border-radius: 8px;
+}
 .card {
   background: linear-gradient(180deg, rgba(255, 248, 235, 0.025), transparent 28%), var(--paper);
   border: 1px solid var(--line);
