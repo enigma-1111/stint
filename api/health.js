@@ -24,13 +24,16 @@ module.exports = async function handler(req, res) {
   const evm = await ping(rh, { jsonrpc: "2.0", id: 1, method: "eth_chainId", params: [] });
   const btc = await ping("https://mempool.space/api/blocks/tip/height");
   const sol = await ping("https://api.mainnet-beta.solana.com", { jsonrpc: "2.0", id: 1, method: "getHealth", params: [] });
-  const ok = evm;
-  res.status(ok ? 200 : 503).json({
-    ok,
+  const persist = Boolean(process.env.GITHUB_TOKEN || process.env.GH_TOKEN);
+  const ready = Boolean(evm && btc && sol);
+  res.status(ready ? 200 : 503).json({
+    ok: ready,
+    ready,
     name: "stint",
     live: "https://stint-tau.vercel.app",
     extras: extras().length,
     rails: 22,
+    persist,
     payouts: { evm: EVM_PAYOUT, bitcoin: BTC_PAYOUT, solana: SOL_PAYOUT },
     ping: { evm, bitcoin: btc, solana: sol },
   });
