@@ -1,5 +1,9 @@
 {
   "cleanUrls": true,
+  "rewrites": [
+    { "source": "/s", "destination": "/api/share" },
+    { "source": "/share", "destination": "/api/share" }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",
