@@ -3,7 +3,7 @@ const path = require("path");
 const { extras, remoteChapters, mergeBook, OPENING } = require("./lib");
 
 const LIVE = "https://stint-tau.vercel.app";
-const IMAGE = LIVE + "/og.jpg";
+const IMAGE = LIVE + "/og.png";
 const SITE_TITLE = "Stint \u2014 the penny story";
 const SITE_DESC = "A story anyone can continue. One penny a character. Pay on twenty EVM chains, Bitcoin, or Solana.";
 const IMAGE_ALT = "Stint \u2014 a story anyone can continue";
@@ -55,7 +55,7 @@ function cardMeta(title, desc, canonical, type) {
     "<meta property=\"og:url\" content=\"" + esc(canonical) + "\"/>" +
     "<meta property=\"og:image\" content=\"" + IMAGE + "\"/>" +
     "<meta property=\"og:image:secure_url\" content=\"" + IMAGE + "\"/>" +
-    "<meta property=\"og:image:type\" content=\"image/jpeg\"/>" +
+    "<meta property=\"og:image:type\" content=\"image/png\"/>" +
     "<meta property=\"og:image:width\" content=\"1200\"/>" +
     "<meta property=\"og:image:height\" content=\"630\"/>" +
     "<meta property=\"og:image:alt\" content=\"" + IMAGE_ALT + "\"/>" +
