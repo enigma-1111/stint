@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="38%" r="55%">
+      <stop offset="0%" stop-color="#e4b86a" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#0d0c0a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#0d0c0a"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <path d="M80 520 C 280 500, 360 430, 520 410 S 820 430, 1120 360" fill="none" stroke="#e4b86a" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+  <text x="80" y="86" fill="#e4b86a" font-family="Georgia, serif" font-size="22" letter-spacing="12">STINT</text>
+  <text x="600" y="300" text-anchor="middle" fill="#f3ece0" font-family="Georgia, serif" font-size="48">A story anyone can continue.</text>
+  <text x="600" y="354" text-anchor="middle" fill="#9d9486" font-family="Georgia, serif" font-size="22">One penny a character.</text>
+</svg>
