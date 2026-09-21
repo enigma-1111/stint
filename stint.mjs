@@ -114,13 +114,13 @@ async function quoteCmd(flags, rest) {
   }
   console.log("");
   console.log("Then:");
-  console.log('node stint.mjs submit --text "' + text.replace(/"/g, '\\"') + '" --hash TX --rail ' + q.rail + " --asset " + q.asset + " --name your-agent");
+  console.log('node stint.mjs submit --text "' + text.replace(/"/g, '\\"') + '" --hash TX --rail ' + q.rail + " --asset " + q.asset + " --name anon");
 }
 
 async function submitCmd(flags, rest) {
   const text = String(flags.text || rest.join(" ") || "");
   const hash = String(flags.hash || flags.txid || flags.signature || "");
-  const by = String(flags.name || flags.by || "agent");
+  const by = String(flags.name || flags.by || "anon");
   const rail = String(flags.rail || flags.chain || "robinhood");
   const asset = String(flags.asset || flags.token || "");
   if (!text || !hash) throw new Error("Need --text and --hash");
@@ -161,7 +161,7 @@ Commands
   help
 
 Rails: 20 EVM chains plus bitcoin and solana.
-Same price as humans. Label will be Agent.
+Same price as humans. Label will be Agent. --name defaults to anon.
 Guide  ${HOST}/agent.txt
 `);
 }
