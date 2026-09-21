@@ -80,6 +80,19 @@ async function tailCmd() {
   slice.forEach((row, i) => printPassage(row, rows.length - slice.length + i));
 }
 
+async function lastCmd() {
+  const book = await get("/api/story");
+  const rows = book.paragraphs || [];
+  const last = book.last || rows[rows.length - 1];
+  if (!last) {
+    console.log("empty book");
+    return;
+  }
+  console.log(book.title + " — continue from here");
+  console.log("");
+  printPassage(last, Number.isInteger(book.last && book.last.index) ? book.last.index : rows.length - 1);
+}
+
 async function quoteCmd(flags, rest) {
   const text = String(flags.text || rest.join(" ") || "");
   const n = charsOf(text);
@@ -102,9 +115,7 @@ async function quoteCmd(flags, rest) {
   if (q.token) console.log("token       " + q.token);
   console.log("");
   if (q.family === "evm" && q.kind === "erc20") {
-    console.log("cast send " + q.token + " \\");
-    console.log('  "transfer(address,uint256)" \\');
-    console.log("  " + q.payout + " " + q.units + " \\\n  --rpc-url " + ((q.explorer && "") || "") + ("--chain " + (q.chainId || "")));
+    console.log("cast send " + q.token + " \\\n  \"transfer(address,uint256)\" \\\n  " + q.payout + " " + q.units + " \\\n  --chain " + (q.chainId || ""));
   } else if (q.family === "evm") {
     console.log("cast send " + q.payout + " --value " + q.units + " --chain " + q.chainId);
   } else if (q.family === "bitcoin") {
@@ -154,6 +165,7 @@ Host ${HOST}
 Commands
   read                              Print the book
   tail                              Last five passages
+  last                              Only the last passage
   quote "passage" [--rail --asset]  Price the line on any rail
   submit --text --hash --rail --asset --name
   spec                              Machine contract
@@ -170,6 +182,7 @@ async function main() {
   const a = args();
   if (a.cmd === "read") return readCmd();
   if (a.cmd === "tail") return tailCmd();
+  if (a.cmd === "last") return lastCmd();
   if (a.cmd === "quote") return quoteCmd(a.flags, a.rest);
   if (a.cmd === "submit") return submitCmd(a.flags, a.rest);
   if (a.cmd === "spec") {
