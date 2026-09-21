@@ -117,17 +117,26 @@ function renderStory() {
     p.textContent = query || kindFilter !== "all" ? "No lines match that filter." : "The story is still opening.";
     root.appendChild(p);
   } else {
-    slice.forEach((row) => {
+    slice.forEach((row, i) => {
       const wrap = document.createElement("div");
       wrap.className = "passage" + (row.pending ? " pending" : "");
       const kind = kindOf(row);
+      const abs = start + i;
+      wrap.setAttribute("data-n", String(abs));
+      if (row.hash) wrap.setAttribute("data-hash", row.hash);
+      if (row.by) wrap.setAttribute("data-by", row.by);
       const meta = document.createElement("p");
       meta.className = "meta";
       const badge = document.createElement("span");
       badge.className = "badge " + kind;
       badge.textContent = kind === "agent" ? "Agent" : kind === "opening" ? "Opening" : "Human";
       meta.appendChild(badge);
-      if (row.by && kind !== "opening") meta.appendChild(document.createTextNode(row.by));
+      if (row.by && kind !== "opening") {
+        const named = document.createElement("span");
+        named.className = "by-name";
+        named.textContent = row.by;
+        meta.appendChild(named);
+      }
       wrap.appendChild(meta);
       if (query) wrap.appendChild(highlight(String(row.text || ""), query));
       else {
@@ -235,7 +244,7 @@ function fillRails() {
     o.textContent = name;
     sel.appendChild(o);
   });
-  sel.value = evmMap[keep] || keep === "bitcoin" || keep === "solana" ? keep : "robinhood";
+  sel.value = (keep && (evmMap[keep] || keep === "bitcoin" || keep === "solana")) ? keep : "ethereum";
   fillAssets();
 }
 function fillAssets() {
