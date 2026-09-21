@@ -86,13 +86,12 @@ function normalizeKind(value) {
   return "human";
 }
 
-function normalizeBy(value, kind) {
+function normalizeBy(value) {
   const s = String(value || "")
-    .replace(/[^\w .+\-]/g, "")
+    .replace(/[^\w .+\-']/g, "")
     .trim()
     .slice(0, 32);
-  if (kind === "agent") return s || "agent";
-  return s;
+  return s || "anon";
 }
 
 function mergeBook(fileBook, fileChapters, remote, live) {
@@ -127,7 +126,7 @@ function mergeBook(fileBook, fileChapters, remote, live) {
       pending: false,
       hash: row.hash || "",
       kind,
-      by: normalizeBy(row.by, kind),
+      by: normalizeBy(row.by),
       rail: row.rail || "",
       asset: row.asset || "",
     });
