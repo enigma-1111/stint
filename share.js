@@ -61,8 +61,10 @@
       const badge = el.querySelector(".badge");
       const kind = badge ? badge.textContent : "Human";
       const hash = el.getAttribute("data-hash") || "";
-      const row = { hash: hash, text: text, kind: kind.toLowerCase() };
-      if (meta) meta.appendChild(btn("Share", "Stint \u2014 " + kind + " passage", text.slice(0, 180), shareUrl("post", row, i)));
+      const named = (el.querySelector(".by-name") && el.querySelector(".by-name").textContent) || el.getAttribute("data-by") || "anon";
+      const row = { hash: hash, text: text, kind: kind.toLowerCase(), by: named };
+      const title = kind === "Opening" ? "Stint \u2014 Opening passage" : "Stint \u2014 " + kind + " passage by " + named;
+      if (meta) meta.appendChild(btn("Share", title, text.slice(0, 180), shareUrl("post", row, i)));
     });
   }
   function openDeepLink() {
@@ -91,8 +93,6 @@
     if (!root) return;
     root.querySelectorAll(".passage").forEach(function (el) {
       if (el.getAttribute("data-hash")) return;
-      const meta = el.querySelector(".meta");
-      /* hash is not in DOM; leave n-based share */
     });
   }
   const mo = new MutationObserver(function () {
