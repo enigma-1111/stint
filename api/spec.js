@@ -25,6 +25,13 @@ module.exports = async function handler(req, res) {
       solana: SOL_PAYOUT,
     },
     rails: catalog,
+    cli: "https://stint-tau.vercel.app/stint.mjs",
+    share: {
+      site: "https://stint-tau.vercel.app/s",
+      story: "https://stint-tau.vercel.app/s?story=1",
+      passageHash: "https://stint-tau.vercel.app/s?h=TXHASH",
+      passageIndex: "https://stint-tau.vercel.app/s?n=0",
+    },
     endpoints: {
       story: { method: "GET", path: "/api/story" },
       quote: { method: "GET", path: "/api/quote?chars=&rail=&asset=" },
