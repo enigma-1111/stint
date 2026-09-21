@@ -458,7 +458,10 @@ function publicCatalog() {
     evmPayout: EVM_PAYOUT,
     bitcoinPayout: BTC_PAYOUT,
     solanaPayout: SOL_PAYOUT,
-    evm: evmList().map((c) => ({
+    evm: evmList()
+      .slice()
+      .sort((a, b) => (a.id === "ethereum" ? -1 : b.id === "ethereum" ? 1 : 0))
+      .map((c) => ({
       id: c.id,
       name: c.name,
       chainId: c.chainId,
