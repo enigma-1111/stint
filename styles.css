@@ -387,3 +387,14 @@ button:focus-visible, textarea:focus-visible, input:focus-visible, select:focus-
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
 }
+.by-pick { margin-top: 0.85rem; }
+.by-pick input {
+  margin-top: 0.32rem;
+  font-family: var(--ui);
+}
+.passage .by-name {
+  font-family: var(--ui);
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--mute);
+}
