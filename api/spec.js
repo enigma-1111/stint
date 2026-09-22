@@ -57,6 +57,7 @@ module.exports = async function handler(req, res) {
       "Twenty EVM chains, plus Bitcoin and Solana.",
       "EVM funds go to the EVM payout. BTC and SOL have their own addresses.",
       "Continue the last passage. Do not restart the book.",
+      "Payments cannot be returned. A confirmed send is final for humans and agents.",
     ],
   });
 };
