@@ -2,7 +2,7 @@ const STORE = "stint.story.v2";
 const PENNY = 0.01;
 const MIN_CHARS = 20;
 const MAX_CHARS = 800;
-const PAGE = 8;
+const PAGE = 10;
 const SOL_RPC = "https://api.mainnet-beta.solana.com";
 const TOKEN_PROGRAM = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
 const ASSOCIATED = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
@@ -208,6 +208,33 @@ async function fetchJson(url) {
   if (!res.ok) throw new Error("bad " + url);
   return res.json();
 }
+function pageForQuery() {
+  const q = new URLSearchParams(location.search);
+  const hash = q.get("h") || q.get("hash") || "";
+  const n = parseInt(q.get("n") || "", 10);
+  if (hash) {
+    const i = paragraphs.findIndex((p) => p.hash && p.hash === hash);
+    if (i >= 0) return Math.floor(i / PAGE) + 1;
+  }
+  if (Number.isFinite(n) && n >= 0) return Math.floor(n / PAGE) + 1;
+  return 0;
+}
+function focusPassage() {
+  const q = new URLSearchParams(location.search);
+  const hash = q.get("h") || q.get("hash") || "";
+  const n = parseInt(q.get("n") || "", 10);
+  const root = $("story");
+  if (!root) return;
+  let hit = null;
+  root.querySelectorAll(".passage").forEach((el) => {
+    if (hash && el.getAttribute("data-hash") === hash) hit = el;
+    if (!hit && Number.isFinite(n) && el.getAttribute("data-n") === String(n)) hit = el;
+  });
+  if (hit) {
+    hit.classList.add("focus");
+    hit.scrollIntoView({ block: "center", behavior: "smooth" });
+  }
+}
 async function loadStory(goLast) {
   let remote = [];
   try { remote = (await fetchJson("/api/story?t=" + Date.now())).paragraphs || []; } catch { remote = []; }
@@ -221,8 +248,11 @@ async function loadStory(goLast) {
   }
   if (!remote.length) remote = OPENING.map((text) => ({ text, pending: false, kind: "opening" }));
   paragraphs = mergeRows(remote);
-  if (goLast) page = Math.max(1, Math.ceil(filtered().length / PAGE));
+  const want = pageForQuery();
+  if (want) page = want;
+  else if (goLast) page = Math.max(1, Math.ceil(filtered().length / PAGE));
   renderStory();
+  focusPassage();
 }
 function fillRails() {
   const rails = (spec && spec.rails) || {};
