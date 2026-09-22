@@ -398,3 +398,17 @@ button:focus-visible, textarea:focus-visible, input:focus-visible, select:focus-
   text-transform: none;
   color: var(--mute);
 }
+
+.site-foot {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 0.2rem 1.15rem calc(1.6rem + env(safe-area-inset-bottom));
+}
+.site-foot p {
+  margin: 0;
+  text-align: center;
+  font-family: var(--ui);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: var(--mute);
+}
