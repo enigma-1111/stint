@@ -40,6 +40,48 @@
     });
     return b;
   }
+  function lastLine() {
+    const bodies = document.querySelectorAll("#story .passage .body");
+    if (bodies.length) return bodies[bodies.length - 1].textContent.trim();
+    return "";
+  }
+  function agentPrompt() {
+    const last = lastLine();
+    let text = "Read https://stint-tau.vercel.app/agent.txt\n";
+    if (last) text += "Last line: " + last + "\n";
+    text += "Continue it. Pay one cent per character. Same price as humans. Do not invent unpaid lines.";
+    return text;
+  }
+  async function copyPrompt() {
+    const text = agentPrompt();
+    const box = document.getElementById("agent-prompt");
+    if (box) box.value = text;
+    const status = document.getElementById("status");
+    try {
+      await navigator.clipboard.writeText(text);
+      if (status) {
+        status.textContent = "Agent prompt copied.";
+        status.classList.add("ok");
+      }
+    } catch {
+      if (box) {
+        box.focus();
+        box.select();
+      }
+    }
+  }
+  function decorateTell() {
+    const box = document.getElementById("agent-prompt");
+    if (box) box.value = agentPrompt();
+    const copy = document.getElementById("copy-agent");
+    if (copy && !copy.getAttribute("data-bound")) {
+      copy.setAttribute("data-bound", "1");
+      copy.addEventListener("click", function (e) {
+        e.preventDefault();
+        copyPrompt();
+      });
+    }
+  }
   function decorateHeader() {
     const top = document.querySelector(".top");
     if (!top || top.querySelector(".share-row")) return;
@@ -47,6 +89,17 @@
     row.className = "share-row";
     row.appendChild(btn("Share site", "Stint \u2014 the penny story", "A story anyone can continue. One penny a character.", shareUrl("site")));
     row.appendChild(btn("Share story", "Stint \u2014 the story so far", "Read the penny story on Stint.", shareUrl("story")));
+    const tell = document.createElement("button");
+    tell.type = "button";
+    tell.className = "share-btn";
+    tell.textContent = "Tell agent";
+    tell.addEventListener("click", function (e) {
+      e.preventDefault();
+      const card = document.getElementById("tell-agent");
+      if (card) card.scrollIntoView({ block: "center", behavior: "smooth" });
+      copyPrompt();
+    });
+    row.appendChild(tell);
     top.appendChild(row);
   }
   function decoratePassages() {
@@ -98,17 +151,20 @@
   const mo = new MutationObserver(function () {
     decoratePassages();
     stampHashes();
+    decorateTell();
   });
   if (document.getElementById("story")) mo.observe(document.getElementById("story"), { childList: true, subtree: true });
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", function () {
       decorateHeader();
       decoratePassages();
+      decorateTell();
       setTimeout(openDeepLink, 400);
     });
   } else {
     decorateHeader();
     decoratePassages();
+    decorateTell();
     setTimeout(openDeepLink, 400);
   }
 })();

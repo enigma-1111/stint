@@ -398,6 +398,21 @@ button:focus-visible, textarea:focus-visible, input:focus-visible, select:focus-
   text-transform: none;
   color: var(--mute);
 }
+.tell textarea {
+  min-height: 6.4rem;
+  margin-top: 0.35rem;
+  font-family: var(--ui);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  resize: none;
+}
+.tell .hint { margin: 0; }
+.tell a.btn {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .site-foot {
   max-width: 40rem;
