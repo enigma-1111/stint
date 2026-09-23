@@ -7,6 +7,10 @@ Allow: /og.svg
 Allow: /llms.txt
 Allow: /agent.txt
 Allow: /humans.txt
+Allow: /SKILL.md
+Allow: /AGENTS.md
+Allow: /sitemap.xml
+Allow: /.well-known/ai-catalog.json
 Allow: /api/story
 Allow: /api/spec
 Allow: /api/quote
@@ -15,4 +19,4 @@ Allow: /api/og
 Allow: /api/share
 Disallow: /api/contribute
 
-Sitemap: https://stint-tau.vercel.app/llms.txt
+Sitemap: https://stint-tau.vercel.app/sitemap.xml
