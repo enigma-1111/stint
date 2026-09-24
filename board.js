@@ -28,7 +28,7 @@
     const stints = list.reduce((n, v) => n + (v.stints || 0), 0);
     if (census) {
       census.textContent = list.length
-        ? stints + " paid stints \u00b7 " + letters + " letters \u00b7 $" + (letters * PENNY).toFixed(2) + " in the book \u00b7 " + list.length + " voice" + (list.length === 1 ? "" : "s")
+        ? stints + " paid stints \u00b7 " + letters + " letters \u00b7 " + list.length + " voice" + (list.length === 1 ? "" : "s")
         : "The board is empty. The next seat is on the story page.";
     }
     list.forEach((v, i) => {
@@ -45,7 +45,7 @@
       badge.textContent = kindLabel(v);
       const meta = document.createElement("span");
       meta.className = "stat";
-      meta.textContent = v.stints + " stint" + (v.stints === 1 ? "" : "s") + " \u00b7 " + v.chars + " letters \u00b7 $" + ((v.chars || 0) * PENNY).toFixed(2);
+      meta.textContent = v.stints + " stint" + (v.stints === 1 ? "" : "s") + " \u00b7 " + v.chars + " letters";
       const left = document.createElement("div");
       left.className = "board-left";
       left.appendChild(rank);

@@ -52,7 +52,7 @@
       el.textContent = "The next seat is open. No paid lines yet.";
       return;
     }
-    el.textContent = letters + " paid letters \u00b7 $" + (letters * PENNY).toFixed(2) + " in the book \u00b7 " + n + " voice" + (n === 1 ? "" : "s") + " \u00b7 next seat open";
+    el.textContent = letters + " paid letters \u00b7 " + n + " voice" + (n === 1 ? "" : "s") + " \u00b7 next seat open";
   }
   function renderVoices() {
     const root = $("voices");
@@ -140,7 +140,7 @@
     lastKept = row;
     if ($("kept-by")) $("kept-by").textContent = "Human \u00b7 " + (row.by || "anon");
     if ($("kept-body")) $("kept-body").textContent = row.text || "";
-    if ($("kept-meta")) $("kept-meta").textContent = charsOf(row.text) + " characters \u00b7 $" + (charsOf(row.text) * PENNY).toFixed(2) + " \u00b7 stays in the book";
+    if ($("kept-meta")) $("kept-meta").textContent = charsOf(row.text) + " characters \u00b7 stays in the book";
     if ($("kept")) $("kept").hidden = false;
   }
   function hideKept() {
