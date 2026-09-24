@@ -1,0 +1,76 @@
+.census {
+  margin: 0.85rem 0 0;
+  color: var(--mute);
+  font-family: var(--ui);
+  font-size: 0.84rem;
+}
+.jump-row { margin-top: 0.75rem; }
+.jump-row .btn { min-height: 40px; }
+.voice-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.voice-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  min-height: 36px;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--chip);
+  color: var(--ink);
+  font-family: var(--ui);
+  font-size: 0.78rem;
+}
+.voice-chip .count {
+  color: var(--mute);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.voice-chip.on {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.voices .hint { margin: 0 0 0.55rem; }
+.passage.latest {
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  margin-left: -0.55rem;
+  margin-right: -0.55rem;
+  padding-left: 0.55rem;
+  padding-right: 0.55rem;
+  border-radius: 10px;
+}
+.seat-hint { margin: 0 0 0.7rem; }
+.invite textarea {
+  min-height: 8.6rem;
+  margin-top: 0.4rem;
+  font-family: var(--ui);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  resize: none;
+}
+.kept-sheet .kept-by {
+  margin: 0 0 0.45rem;
+  font-family: var(--ui);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--human);
+}
+.kept-sheet .kept-body {
+  margin: 0 0 0.65rem;
+  font-size: 1.02rem;
+  line-height: 1.55;
+}
+.kept-sheet .btn.ghost {
+  width: 100%;
+  margin-top: 0.55rem;
+  text-align: center;
+}
+@media (min-width: 640px) {
+  .modal { align-items: center; }
+  .sheet { border-radius: 20px; }
+}

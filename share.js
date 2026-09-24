@@ -148,6 +148,7 @@
       if (el.getAttribute("data-hash")) return;
     });
   }
+  window.stintShare = { shareUrl: shareUrl, share: share, passageKey: passageKey };
   const mo = new MutationObserver(function () {
     decoratePassages();
     stampHashes();
