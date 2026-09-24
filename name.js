@@ -38,6 +38,7 @@
     } catch {}
     return nativeFetch(url, opts);
   };
+  window.stintName = { clean, currentBy };
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", function () {
       restoreBy();
