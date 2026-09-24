@@ -1,0 +1,54 @@
+.board-card { padding: 0.4rem 0.2rem 0.7rem; }
+.board {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.board-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.7rem;
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid var(--line);
+}
+.board-row:last-child { border-bottom: 0; }
+.board-left {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  min-width: 0;
+}
+.rank {
+  font-family: var(--ui);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--mute);
+  width: 1.4rem;
+  flex: none;
+}
+.board-row .who {
+  float: none;
+  font-family: var(--serif);
+  font-size: 1rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
+}
+.board-row .stat {
+  font-family: var(--ui);
+  font-size: 0.74rem;
+  color: var(--mute);
+  text-align: right;
+  flex: none;
+}
+.jump-row .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+@media (max-width: 420px) {
+  .board-row { flex-wrap: wrap; }
+  .board-row .stat { width: 100%; text-align: left; padding-left: 1.95rem; }
+}
