@@ -66,3 +66,18 @@
   .modal { align-items: center; }
   .sheet { border-radius: 20px; }
 }
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 0.7rem;
+}
+.brand-mark {
+  width: 3.15rem;
+  height: 3.15rem;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #15120f;
+  box-shadow: 0 0 0 1px var(--line);
+}
+.brand .mark { margin: 0; }
