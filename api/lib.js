@@ -129,6 +129,7 @@ function mergeBook(fileBook, fileChapters, remote, live) {
       by: normalizeBy(row.by),
       rail: row.rail || "",
       asset: row.asset || "",
+      held: Boolean(row.held),
     });
   });
   return {
