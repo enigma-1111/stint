@@ -35,11 +35,12 @@ module.exports = async function handler(req, res) {
   paid.forEach((row) => {
     const name = String(row.by || "anon");
     const key = name.toLowerCase();
-    const cur = voiceMap.get(key) || { by: name, stints: 0, chars: 0, human: 0, agent: 0 };
+    const cur = voiceMap.get(key) || { by: name, stints: 0, chars: 0, human: 0, agent: 0, held: false };
     cur.stints += 1;
     cur.chars += Array.from(String(row.text || "")).length;
     if (row.kind === "agent") cur.agent += 1;
     else cur.human += 1;
+    if (row.held) cur.held = true;
     voiceMap.set(key, cur);
   });
   const letters = paid.reduce((n, row) => n + Array.from(String(row.text || "")).length, 0);
