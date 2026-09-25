@@ -1,16 +1,15 @@
 (function () {
-  const PENNY = 0.01;
   const $ = (id) => document.getElementById(id);
   let rows = [];
   let sort = "stints";
-
+  let filter = "all";
   function kindLabel(v) {
     if (v.agent && !v.human) return "Agent";
     if (v.human && !v.agent) return "Human";
     return "Both";
   }
   function ordered() {
-    const list = rows.slice();
+    const list = rows.filter((v) => filter !== "holds" || Boolean(v.held)).slice();
     if (sort === "letters") list.sort((a, b) => b.chars - a.chars || b.stints - a.stints || a.by.localeCompare(b.by));
     else if (sort === "name") list.sort((a, b) => a.by.localeCompare(b.by));
     else list.sort((a, b) => b.stints - a.stints || b.chars - a.chars || a.by.localeCompare(b.by));
@@ -29,7 +28,7 @@
     if (census) {
       census.textContent = list.length
         ? stints + " paid stints \u00b7 " + letters + " letters \u00b7 " + list.length + " voice" + (list.length === 1 ? "" : "s")
-        : "The board is empty. The next seat is on the story page.";
+        : (filter === "holds" ? "No holder marks yet. The mark lights after a contract is live and a paid line." : "The board is empty. The next seat is on the story page.");
     }
     list.forEach((v, i) => {
       const li = document.createElement("li");
@@ -50,6 +49,13 @@
       left.className = "board-left";
       left.appendChild(rank);
       left.appendChild(name);
+      if (v.held) {
+        const mark = document.createElement("span");
+        mark.className = "held-mark";
+        mark.title = "Held $STINT on a paid line";
+        mark.textContent = "\u2726";
+        left.appendChild(mark);
+      }
       left.appendChild(badge);
       li.appendChild(left);
       li.appendChild(meta);
@@ -61,15 +67,18 @@
       const res = await fetch("/api/story?t=" + Date.now(), { cache: "no-store" });
       const data = await res.json();
       rows = Array.isArray(data.voices) ? data.voices : [];
-    } catch {
-      rows = [];
-    }
+    } catch { rows = []; }
     render();
   }
   document.querySelectorAll("#sorts .chip").forEach((btn) => {
     btn.addEventListener("click", () => {
-      sort = btn.getAttribute("data-sort") || "stints";
-      document.querySelectorAll("#sorts .chip").forEach((b) => b.classList.toggle("on", b === btn));
+      if (btn.getAttribute("data-filter")) {
+        filter = btn.getAttribute("data-filter") || "all";
+        document.querySelectorAll("#sorts .chip[data-filter]").forEach((b) => b.classList.toggle("on", b === btn));
+      } else {
+        sort = btn.getAttribute("data-sort") || "stints";
+        document.querySelectorAll("#sorts .chip[data-sort]").forEach((b) => b.classList.toggle("on", b === btn));
+      }
       render();
     });
   });
