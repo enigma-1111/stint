@@ -1,20 +1,16 @@
 (function () {
   const $ = (id) => document.getElementById(id);
   function clean(value) {
-    return String(value || "")
-      .replace(/[^\w .+\-']/g, "")
-      .trim()
-      .slice(0, 32);
+    return String(value || "").replace(/[^\w .+\-']/g, "").trim().slice(0, 32);
   }
   function currentBy() {
     return clean($("by") && $("by").value) || "anon";
   }
   function paintBy() {
     const who = document.querySelector(".who");
-    if (who) who.textContent = "posted as Human \u00b7 " + currentBy();
-    try {
-      localStorage.setItem("stint.by", clean($("by") && $("by").value));
-    } catch {}
+    const held = window.stintToken && window.stintToken.held;
+    if (who) who.textContent = "posted as Human \u00b7 " + currentBy() + (held ? " \u00b7 holds $STINT" : "");
+    try { localStorage.setItem("stint.by", clean($("by") && $("by").value)); } catch {}
   }
   function restoreBy() {
     const el = $("by");
@@ -38,7 +34,7 @@
     } catch {}
     return nativeFetch(url, opts);
   };
-  window.stintName = { clean, currentBy };
+  window.stintName = { clean, currentBy, paintBy };
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", function () {
       restoreBy();
