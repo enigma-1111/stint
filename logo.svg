@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Stint">
+  <defs>
+    <filter id="paper" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" result="n"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.08  0 0 0 0 0.07  0 0 0 0 0.06  0 0 0 0.55 0" result="g"/>
+      <feBlend in="SourceGraphic" in2="g" mode="multiply"/>
+    </filter>
+    <radialGradient id="foil" cx="35%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#f0d7a2"/>
+      <stop offset="45%" stop-color="#d4ae74"/>
+      <stop offset="100%" stop-color="#8a6a38"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="#15120f"/>
+  <rect width="512" height="512" filter="url(#paper)" fill="#1a1612"/>
+  <circle cx="256" cy="256" r="168" fill="none" stroke="url(#foil)" stroke-width="5"/>
+  <circle cx="256" cy="256" r="154" fill="none" stroke="url(#foil)" stroke-width="2.2" opacity="0.85"/>
+  <text x="256" y="276" text-anchor="middle" font-size="72" font-family="Georgia, Times New Roman, serif" fill="url(#foil)" letter-spacing="6">STINT</text>
+</svg>
