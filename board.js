@@ -15,6 +15,18 @@
     else list.sort((a, b) => b.stints - a.stints || b.chars - a.chars || a.by.localeCompare(b.by));
     return list;
   }
+  function paintChips() {
+    document.querySelectorAll("#sorts .chip[data-sort]").forEach((b) => {
+      const on = b.getAttribute("data-sort") === sort;
+      b.classList.toggle("on", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    document.querySelectorAll("#sorts .chip[data-filter]").forEach((b) => {
+      const on = filter !== "all" && b.getAttribute("data-filter") === filter;
+      b.classList.toggle("on", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
   function render() {
     const root = $("board");
     const empty = $("empty");
@@ -68,17 +80,18 @@
       const data = await res.json();
       rows = Array.isArray(data.voices) ? data.voices : [];
     } catch { rows = []; }
+    paintChips();
     render();
   }
   document.querySelectorAll("#sorts .chip").forEach((btn) => {
     btn.addEventListener("click", () => {
       if (btn.getAttribute("data-filter")) {
-        filter = btn.getAttribute("data-filter") || "all";
-        document.querySelectorAll("#sorts .chip[data-filter]").forEach((b) => b.classList.toggle("on", b === btn));
+        const next = btn.getAttribute("data-filter") || "holds";
+        filter = filter === next ? "all" : next;
       } else {
         sort = btn.getAttribute("data-sort") || "stints";
-        document.querySelectorAll("#sorts .chip[data-sort]").forEach((b) => b.classList.toggle("on", b === btn));
       }
+      paintChips();
       render();
     });
   });
