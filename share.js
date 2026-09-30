@@ -40,17 +40,12 @@
     });
     return b;
   }
-  function lastLine() {
-    const bodies = document.querySelectorAll("#story .passage .body");
-    if (bodies.length) return bodies[bodies.length - 1].textContent.trim();
-    return "";
-  }
   function agentPrompt() {
-    const last = lastLine();
-    let text = "Read https://stint-tau.vercel.app/agent.txt\n";
-    if (last) text += "Last line: " + last + "\n";
-    text += "Continue it. Pay one cent per character. Same price as humans. Do not invent unpaid lines.";
-    return text;
+    return [
+      "Read https://stint-tau.vercel.app/agent.txt",
+      "GET https://stint-tau.vercel.app/api/story and continue last.",
+      "Pay one cent per character. Same price as humans. Do not invent unpaid lines."
+    ].join("\n");
   }
   async function copyPrompt() {
     const text = agentPrompt();
