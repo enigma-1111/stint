@@ -24,7 +24,21 @@
         : "No contract yet. When one exists, holders get a mark. Writing still costs a penny.";
     }
     const ca = document.getElementById("token-ca");
-    if (ca) ca.textContent = window.stintToken.contract || "not launched";
+    if (ca) ca.textContent = window.stintToken.contract || "Not launched yet";
+    const cfg = window.stintToken.cfg || {};
+    const pair = document.getElementById("fact-pair");
+    if (pair && cfg.pair) pair.textContent = cfg.pair;
+    const supply = document.getElementById("fact-supply");
+    if (supply && cfg.supply) supply.textContent = Number(cfg.supply).toLocaleString("en-US");
+    const lp = document.getElementById("fact-lp");
+    if (lp && cfg.lp) lp.textContent = cfg.lp;
+    const fd = document.getElementById("fact-fd");
+    if (fd && cfg.startFd) fd.textContent = cfg.startFd + ", if launched as noted";
+    const pool = document.getElementById("pool-link");
+    if (pool && window.stintToken.contract) {
+      pool.href = "https://pools.fun";
+      pool.textContent = "Open pools.fun";
+    }
     paintWho();
     if (window.stintName && window.stintName.paintBy) window.stintName.paintBy();
   }
@@ -70,6 +84,7 @@
       window.stintToken.chainId = Number(cfg.chainId || 4663);
       window.stintToken.rpc = cfg.rpc || "";
       window.stintToken.live = /^0x[0-9a-fA-F]{40}$/.test(window.stintToken.contract);
+      window.stintToken.cfg = cfg;
     } catch {}
     paintPage();
     if (window.ethereum && window.ethereum.request) {
