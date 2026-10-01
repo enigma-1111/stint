@@ -427,3 +427,50 @@ button:focus-visible, textarea:focus-visible, input:focus-visible, select:focus-
   letter-spacing: 0.02em;
   color: var(--mute);
 }
+
+/* devices: phones, tablets, small laptops */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { overflow-x: hidden; }
+img, svg, video, canvas { max-width: 100%; height: auto; }
+.wrap, .site-foot {
+  padding-left: max(1.05rem, env(safe-area-inset-left));
+  padding-right: max(1.05rem, env(safe-area-inset-right));
+}
+input, select, textarea { font-size: 16px; }
+pre, code, .mono, .fact-val { overflow-wrap: anywhere; word-break: break-word; }
+.jump-row .btn, .pages button, .btn { min-height: 44px; }
+.token-facts {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.2rem 0 0.8rem;
+}
+.token-facts div {
+  display: grid;
+  grid-template-columns: 7.2rem 1fr;
+  gap: 0.55rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.token-facts div:last-child { border-bottom: 0; }
+.fact-key {
+  font-family: var(--ui);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.fact-val { font-size: 0.95rem; }
+.token-page ol, .token-page p { color: var(--mute); }
+.token-page a { color: var(--accent); }
+@media (max-width: 720px) {
+  .brand-mark { width: 2.6rem; height: 2.6rem; }
+  .lede { font-size: 1.55rem; }
+  .sub { font-size: 0.95rem; }
+  .card { padding: 1rem 0.9rem; }
+  .passage.latest { margin-left: 0; margin-right: 0; }
+}
+@media (max-width: 420px) {
+  .token-facts div { grid-template-columns: 1fr; gap: 0.15rem; }
+  .jump-row .btn { flex: 1 1 8.5rem; }
+  .tool-row { align-items: flex-start; flex-direction: column; }
+}
