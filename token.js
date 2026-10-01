@@ -20,8 +20,8 @@
     const status = document.getElementById("token-status");
     if (status) {
       status.textContent = window.stintToken.live
-        ? (window.stintToken.held ? "This wallet holds $STINT. The mark is on. The price is still one cent." : "Connect a Robinhood Chain wallet to see if the mark is on. Writing still costs a penny.")
-        : "No contract yet. When one exists, holders get a mark. Writing still costs a penny.";
+        ? (window.stintToken.held ? "This wallet holds $STINT. Fee share, if the pool is trading, is claimed on pools.fun. Writing is still one cent." : "Connect a Robinhood Chain wallet to see if it holds $STINT. Writing still costs a penny.")
+        : "No contract yet. When one is set, holders may claim a share of pool fees. Writing still costs a penny.";
     }
     const ca = document.getElementById("token-ca");
     if (ca) ca.textContent = window.stintToken.contract || "Not launched yet";
