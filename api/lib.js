@@ -24,15 +24,51 @@ async function verifyPay(hash, chars, rail, asset) {
   return rails.verifyPay(hash, chars, rail, asset);
 }
 
+function ghHeaders() {
+  const headers = {
+    accept: "application/vnd.github+json",
+    "user-agent": "stint",
+    "cache-control": "no-cache",
+  };
+  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || "";
+  if (token) headers.authorization = "Bearer " + token;
+  return headers;
+}
+
+function parseChapters(data) {
+  if (!data) return [];
+  if (Array.isArray(data.chapters)) return data.chapters;
+  if (data.content) {
+    try {
+      const parsed = JSON.parse(Buffer.from(String(data.content).replace(/\n/g, ""), "base64").toString("utf8"));
+      return Array.isArray(parsed.chapters) ? parsed.chapters : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
 async function remoteChapters() {
+  try {
+    const res = await fetch(GH_API + "?ref=main&t=" + Date.now(), {
+      cache: "no-store",
+      headers: ghHeaders(),
+    });
+    if (res.ok) {
+      const chapters = parseChapters(await res.json());
+      if (chapters.length) return chapters;
+    }
+  } catch {
+    /* raw fallback */
+  }
   try {
     const res = await fetch(GH_RAW + "?t=" + Date.now(), {
       cache: "no-store",
-      headers: { accept: "application/json" },
+      headers: { accept: "application/json", "user-agent": "stint", "cache-control": "no-cache" },
     });
     if (!res.ok) return [];
-    const data = await res.json();
-    return Array.isArray(data.chapters) ? data.chapters : [];
+    return parseChapters(await res.json());
   } catch {
     return [];
   }
@@ -43,18 +79,10 @@ async function persistChapter(row) {
   if (!token) return false;
   try {
     const get = await fetch(GH_API + "?ref=main", {
-      headers: {
-        accept: "application/vnd.github+json",
-        authorization: "Bearer " + token,
-        "user-agent": "stint",
-      },
+      headers: ghHeaders(),
     });
     const file = await get.json();
-    let chapters = [];
-    if (file && file.content) {
-      const parsed = JSON.parse(Buffer.from(file.content, "base64").toString("utf8"));
-      chapters = Array.isArray(parsed.chapters) ? parsed.chapters : [];
-    }
+    let chapters = parseChapters(file);
     if (chapters.some((c) => c.hash === row.hash)) return true;
     chapters.push(row);
     const body = {
@@ -65,12 +93,7 @@ async function persistChapter(row) {
     if (file && file.sha) body.sha = file.sha;
     const put = await fetch(GH_API, {
       method: "PUT",
-      headers: {
-        accept: "application/vnd.github+json",
-        authorization: "Bearer " + token,
-        "content-type": "application/json",
-        "user-agent": "stint",
-      },
+      headers: Object.assign(ghHeaders(), { "content-type": "application/json" }),
       body: JSON.stringify(body),
     });
     return put.ok;
@@ -106,15 +129,12 @@ function mergeBook(fileBook, fileChapters, remote, live) {
     seen.add("t:" + text);
     paragraphs.push({ text, pending: false, kind: "opening", by: "" });
   });
-  const paid = []
-    .concat(fileChapters || [], remote || [], live || [])
-    .filter((row) => row && row.text)
-    .sort((a, b) => {
-      const ba = Number(a.block || 0);
-      const bb = Number(b.block || 0);
-      if (ba !== bb) return ba - bb;
-      return String(a.hash || "").localeCompare(String(b.hash || ""));
-    });
+  const remoteList = Array.isArray(remote) ? remote : [];
+  const fileList = Array.isArray(fileChapters) ? fileChapters : [];
+  const liveList = Array.isArray(live) ? live : [];
+  const base = remoteList.length >= fileList.length ? remoteList : fileList;
+  const rest = remoteList.length >= fileList.length ? fileList : remoteList;
+  const paid = [].concat(base, rest, liveList).filter((row) => row && row.text);
   paid.forEach((row) => {
     const key = row.hash ? "h:" + row.hash : "t:" + row.text;
     if (seen.has(key) || seen.has("t:" + row.text)) return;
@@ -130,6 +150,7 @@ function mergeBook(fileBook, fileChapters, remote, live) {
       rail: row.rail || "",
       asset: row.asset || "",
       held: Boolean(row.held),
+      at: row.at || "",
     });
   });
   return {
