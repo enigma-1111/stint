@@ -96,4 +96,9 @@
     });
   });
   load();
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") load();
+  });
+  window.addEventListener("pageshow", load);
+  setInterval(load, 20000);
 })();
