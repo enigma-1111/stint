@@ -1,0 +1,23 @@
+.buy-bar {
+  position: sticky;
+  top: 0;
+  z-index: 12;
+  display: flex;
+  justify-content: center;
+  padding: calc(0.35rem + env(safe-area-inset-top)) 0.8rem 0.35rem;
+  background: #1a160e;
+  border-bottom: 1px solid #3a3229;
+}
+.buy-bar a {
+  color: #e8c07a;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.buy-bar a:hover { color: #f2e8d8; }
+@media (prefers-color-scheme: light) {
+  .buy-bar { background: #2b241c; border-bottom-color: #2b241c; }
+  .buy-bar a { color: #f3ead9; }
+}
