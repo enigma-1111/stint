@@ -51,9 +51,11 @@ module.exports = async function handler(req, res) {
     }
   } catch {}
   try {
-    const scout = await fetch("https://robinhoodchain.blockscout.com/api/v2/tokens/" + CA, { headers: { accept: "application/json" } });
+    const scout = await fetch("https://robinhoodchain.blockscout.com/api/v2/tokens/" + CA, {
+      headers: { accept: "application/json", "user-agent": "stint-token-stats" },
+    });
     const token = await scout.json();
-    out.holders = num(token.holders_count || token.holders);
+    out.holders = num(token.holders_count != null ? token.holders_count : token.holders);
     if (token.symbol) out.symbol = token.symbol;
     if (token.name) out.name = token.name;
   } catch {}
