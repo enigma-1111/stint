@@ -21,7 +21,7 @@
     if (status) {
       status.textContent = window.stintToken.live
         ? (window.stintToken.held ? "This wallet holds $STINT. Fee share, if the pool is trading, is claimed on pools.fun. Writing is still one cent." : "Connect a Robinhood Chain wallet to see if it holds $STINT. Writing still costs a penny.")
-        : "No contract yet. When one is set, holders may claim a share of pool fees. Writing still costs a penny.";
+        : "No contract yet. Writing still costs a penny.";
     }
     const ca = document.getElementById("token-ca");
     if (ca) ca.textContent = window.stintToken.contract || "Not launched yet";
@@ -32,12 +32,10 @@
     if (supply && cfg.supply) supply.textContent = Number(cfg.supply).toLocaleString("en-US");
     const lp = document.getElementById("fact-lp");
     if (lp && cfg.lp) lp.textContent = cfg.lp;
-    const fd = document.getElementById("fact-fd");
-    if (fd && cfg.startFd) fd.textContent = cfg.startFd + ", if launched as noted";
     const pool = document.getElementById("pool-link");
-    if (pool && window.stintToken.contract) {
-      pool.href = "https://pools.fun";
-      pool.textContent = "Open pools.fun";
+    if (pool && cfg.pool) {
+      pool.href = cfg.pool;
+      pool.textContent = "Open the pool";
     }
     paintWho();
     if (window.stintName && window.stintName.paintBy) window.stintName.paintBy();
