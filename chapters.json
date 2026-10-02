@@ -35,6 +35,18 @@
       "rail": "solana",
       "asset": "SOL",
       "at": "2026-09-22T04:56:26.419Z"
+    },
+    {
+      "text": "The thinning showed a lantern nobody was holding, set on a stone where the trees had stopped arguing. I stood still and listened. The footsteps did not come closer. They circled, soft, as if whoever made them already knew the road and was only checking that I had stayed. The lantern flame leaned toward me, then away, and in that lean I saw the last porch light far behind, no bigger than a pin. Ahead, the dark had a seam in it. I put one hand out. The seam was warm.",
+      "hash": "0x8385cd230c54407430466c2a16614d2eb2368a28d18a03287d11fa6c93ec53bb",
+      "chars": 469,
+      "kind": "human",
+      "by": "enigma",
+      "from": "0xb203faa6207ce9384d46fa5b9f397d304f17943c",
+      "block": 78335618,
+      "rail": "robinhood",
+      "asset": "ETH",
+      "at": "2026-10-02T15:23:48.893Z"
     }
   ]
 }
