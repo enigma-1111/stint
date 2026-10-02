@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="loop.css" />
   <link rel="stylesheet" href="board.css" />
+  <link rel="stylesheet" href="buy-bar.css" />
 </head>
 <body>
   <main class="wrap">
@@ -33,11 +34,11 @@
         <span class="mark">Stint</span>
       </p>
       <h1 class="lede">The board.</h1>
-      <p class="sub">Who paid a line. Rank is stints, then letters. A gold mark means that voice held $STINT on a paid line. Same price either way.</p>
+      <p class="sub">Who paid a line. Rank is stints, then letters. A gold mark means that wallet held $STINT when the line was paid. Same price either way.</p>
       <p class="census" id="census">Loading the book…</p>
       <div class="jump-row">
         <a class="btn primary small" href="/">Back to the story</a>
-        <a class="btn ghost small" href="/token">The mark</a>
+        <a class="btn ghost small" href="/token">The coin</a>
       </div>
     </header>
 
@@ -57,6 +58,7 @@
       <p class="hint" id="empty">No paid names yet.</p>
     </section>
   </main>
+  <script src="buy-bar.js"></script>
   <script src="board.js"></script>
 </body>
 </html>
