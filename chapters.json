@@ -10,7 +10,8 @@
       "block": 69259382,
       "rail": "robinhood",
       "asset": "ETH",
-      "at": "2026-09-22T01:21:51.613Z"
+      "at": "2026-09-22T01:21:51.613Z",
+      "held": true
     },
     {
       "text": "Then another voice paid a dollar and spoke. The road kept going. The story went on, just a bit more.",
@@ -46,7 +47,8 @@
       "block": 78335618,
       "rail": "robinhood",
       "asset": "ETH",
-      "at": "2026-10-02T15:23:48.893Z"
+      "at": "2026-10-02T15:23:48.893Z",
+      "held": true
     }
   ]
 }
