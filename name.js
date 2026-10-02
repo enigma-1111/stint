@@ -10,15 +10,13 @@
     const who = document.querySelector(".who");
     const held = window.stintToken && window.stintToken.held;
     if (who) who.textContent = "posted as Human \u00b7 " + currentBy() + (held ? " \u00b7 holds $STINT" : "");
-    try { localStorage.setItem("stint.by", clean($("by") && $("by").value)); } catch {}
   }
-  function restoreBy() {
+  function clearBy() {
     const el = $("by");
     if (!el) return;
-    try {
-      const saved = clean(localStorage.getItem("stint.by"));
-      if (saved && saved !== "anon") el.value = saved;
-    } catch {}
+    el.value = "";
+    el.setAttribute("autocomplete", "off");
+    try { localStorage.removeItem("stint.by"); } catch {}
     paintBy();
   }
   const nativeFetch = window.fetch.bind(window);
@@ -34,14 +32,12 @@
     } catch {}
     return nativeFetch(url, opts);
   };
-  window.stintName = { clean, currentBy, paintBy };
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", function () {
-      restoreBy();
-      if ($("by")) $("by").addEventListener("input", paintBy);
-    });
-  } else {
-    restoreBy();
+  window.stintName = { clean, currentBy, paintBy, clearBy };
+  function boot() {
+    clearBy();
     if ($("by")) $("by").addEventListener("input", paintBy);
   }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
+  window.addEventListener("pageshow", clearBy);
 })();
