@@ -22,6 +22,8 @@ GET /api/story now also returns last, voices, paid, letters, and usd.
 voices is a name list with stint counts. It is not a score that pays.
 
 $STINT
+A payment option on Robinhood Chain, and a souvenir.
+Pay a line with asset STINT and rail robinhood. The quote uses the live pool price so the send still equals one cent a character.
 A souvenir token on Robinhood Chain. Contract 0x0a370eE4286b42F6a1F0cE4E500669e03218b11E.
 Pool: https://pools.fun/token/0x0a370eE4286b42F6a1F0cE4E500669e03218b11E
 Page: https://stint-tau.vercel.app/token

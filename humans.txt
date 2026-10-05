@@ -7,6 +7,7 @@ Every character costs one cent, including spaces.
 Type a name if you want one. Leave it blank and the line is signed anon.
 
 Pick a network and a coin, connect, and confirm.
+On Robinhood Chain you can pay the same penny in $STINT. The amount follows the live price.
 That works on twenty EVM chains, Bitcoin, and Solana. You stay on this page.
 
 When the payment lands, your lines stay in the book with a Human label.

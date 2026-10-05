@@ -16,6 +16,7 @@ const CHAINS = {
     explorer: "https://robinhoodchain.blockscout.com",
     tokens: {
       USDG: { address: "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168", decimals: 6, stable: true },
+      STINT: { address: "0x0a370eE4286b42F6a1F0cE4E500669e03218b11E", decimals: 18, stable: false, priceId: "stint" },
     },
   },
   ethereum: {
@@ -257,6 +258,20 @@ function usdDue(chars) {
   return Number(chars) * PENNY;
 }
 
+
+async function stintPrice() {
+  const now = Date.now();
+  if (g.__stintPx && now - g.__stintPx.at < PRICE_TTL && g.__stintPx.usd > 0) return g.__stintPx.usd;
+  const res = await fetch("https://api.dexscreener.com/latest/dex/tokens/0x0a370eE4286b42F6a1F0cE4E500669e03218b11E", { headers: { accept: "application/json" } });
+  if (!res.ok) throw new Error("stint price down");
+  const data = await res.json();
+  const pair = (data.pairs || []).find((p) => String(p.chainId || "").toLowerCase() === "robinhood") || (data.pairs || [])[0];
+  const px = Number(pair && pair.priceUsd);
+  if (!(px > 0)) throw new Error("no STINT price");
+  g.__stintPx = { at: now, usd: px };
+  return px;
+}
+
 async function prices() {
   const now = Date.now();
   if (g.__stintPrice.at && now - g.__stintPrice.at < PRICE_TTL && g.__stintPrice.usd.ethereum) {
@@ -294,6 +309,10 @@ async function quote(chars, railId, assetSym) {
   let px = 1;
   if (asset.stable) {
     units = BigInt(chars) * (10n ** BigInt(asset.decimals)) / 100n;
+  } else if (asset.priceId === "stint") {
+    px = await stintPrice();
+    if (!(px > 0)) throw new Error("no STINT price");
+    units = unitsForUsd(usd, asset.decimals, px);
   } else {
     const feed = await prices();
     px = feed[asset.priceId];
@@ -469,7 +488,7 @@ function publicCatalog() {
       gas: c.native.symbol,
       rpc: c.rpc,
       explorer: c.explorer,
-      stables: Object.keys(c.tokens || {}),
+      stables: Object.keys(c.tokens || {}).filter((s) => c.tokens[s].stable), coins: Object.keys(c.tokens || {}).filter((s) => !c.tokens[s].stable),
     })),
     bitcoin: { id: "bitcoin", payout: BTC_PAYOUT, gas: "BTC", explorer: BITCOIN.explorer },
     solana: { id: "solana", payout: SOL_PAYOUT, gas: "SOL", stables: ["USDC", "USDT"], explorer: SOLANA.explorer },

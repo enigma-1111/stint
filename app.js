@@ -295,6 +295,7 @@ function fillAssets() {
   } else {
     const chain = evmOf(id);
     (chain && chain.stables || []).forEach(add);
+    (chain && chain.coins || []).forEach(add);
     if (chain && chain.gas) add(chain.gas);
   }
   if ([].some.call(asset.options, (o) => o.value === keep)) asset.value = keep;
