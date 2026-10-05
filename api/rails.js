@@ -262,11 +262,22 @@ function usdDue(chars) {
 async function stintPrice() {
   const now = Date.now();
   if (g.__stintPx && now - g.__stintPx.at < PRICE_TTL && g.__stintPx.usd > 0) return g.__stintPx.usd;
-  const res = await fetch("https://api.dexscreener.com/latest/dex/tokens/0x0a370eE4286b42F6a1F0cE4E500669e03218b11E", { headers: { accept: "application/json" } });
-  if (!res.ok) throw new Error("stint price down");
-  const data = await res.json();
-  const pair = (data.pairs || []).find((p) => String(p.chainId || "").toLowerCase() === "robinhood") || (data.pairs || [])[0];
-  const px = Number(pair && pair.priceUsd);
+  const headers = { accept: "application/json", "user-agent": "stint-quote/1.0" };
+  const urls = [
+    "https://api.dexscreener.com/latest/dex/tokens/0x0a370eE4286b42F6a1F0cE4E500669e03218b11E",
+    "https://api.dexscreener.com/latest/dex/pairs/robinhood/0x1d8762b0C6104345364af0bC87569B42654a4905",
+  ];
+  let px = 0;
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { headers });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const pair = data.pair || (data.pairs || []).find((row) => String(row.chainId || "").toLowerCase() === "robinhood") || (data.pairs || [])[0];
+      px = Number(pair && pair.priceUsd);
+      if (px > 0) break;
+    } catch {}
+  }
   if (!(px > 0)) throw new Error("no STINT price");
   g.__stintPx = { at: now, usd: px };
   return px;
