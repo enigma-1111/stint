@@ -1,12 +1,13 @@
 (function () {
   const LIVE = location.origin;
+  const STAMP = "v=5";
   function passageKey(row, i) {
     return row && row.hash ? "h=" + encodeURIComponent(row.hash) : "n=" + i;
   }
   function shareUrl(kind, row, i) {
-    if (kind === "site") return LIVE + "/s";
-    if (kind === "story") return LIVE + "/s?story=1";
-    return LIVE + "/s?" + passageKey(row, i);
+    if (kind === "site") return LIVE + "/s?" + STAMP;
+    if (kind === "story") return LIVE + "/s?story=1&" + STAMP;
+    return LIVE + "/s?" + passageKey(row, i) + "&" + STAMP;
   }
   async function share(title, text, url) {
     try {
@@ -24,7 +25,7 @@
         status.textContent = "Link copied.";
         status.classList.add("ok");
       }
-    } catch {
+    } catch (err) {
       window.prompt("Copy this Stint link", url);
     }
   }
@@ -58,7 +59,7 @@
         status.textContent = "Agent prompt copied.";
         status.classList.add("ok");
       }
-    } catch {
+    } catch (err) {
       if (box) {
         box.focus();
         box.select();
@@ -136,17 +137,9 @@
       root.scrollIntoView({ block: "start", behavior: "smooth" });
     }
   }
-  function stampHashes() {
-    const root = document.getElementById("story");
-    if (!root) return;
-    root.querySelectorAll(".passage").forEach(function (el) {
-      if (el.getAttribute("data-hash")) return;
-    });
-  }
   window.stintShare = { shareUrl: shareUrl, share: share, passageKey: passageKey };
   const mo = new MutationObserver(function () {
     decoratePassages();
-    stampHashes();
     decorateTell();
   });
   if (document.getElementById("story")) mo.observe(document.getElementById("story"), { childList: true, subtree: true });
