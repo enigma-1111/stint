@@ -275,7 +275,7 @@ async function stintPrice() {
       g.__stintPx = { at: now, usd: px };
       return px;
     }
-  } catch {}
+  } catch (err) { g.__stintPxErr = err && err.message || "pool"; }
   const headers = { accept: "application/json", "user-agent": "stint-quote/1.0" };
   const urls = [
     "https://api.dexscreener.com/latest/dex/tokens/0x0a370eE4286b42F6a1F0cE4E500669e03218b11E",
@@ -294,7 +294,7 @@ async function stintPrice() {
       }
     } catch {}
   }
-  throw new Error("no STINT price");
+  throw new Error("no STINT price: " + (g.__stintPxErr || "both feeds"));
 }
 
 async function prices() {
@@ -336,7 +336,7 @@ async function quote(chars, railId, assetSym) {
     units = BigInt(chars) * (10n ** BigInt(asset.decimals)) / 100n;
   } else if (asset.priceId === "stint") {
     px = await stintPrice();
-    if (!(px > 0)) throw new Error("no STINT price");
+    if (!(px > 0)) throw new Error("no STINT price: " + (g.__stintPxErr || "both feeds"));
     units = unitsForUsd(usd, asset.decimals, px);
   } else {
     const feed = await prices();
