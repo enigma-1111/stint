@@ -3,7 +3,7 @@ const path = require("path");
 const { extras, remoteChapters, mergeBook, OPENING } = require("./lib");
 
 const LIVE = "https://stint-tau.vercel.app";
-const IMAGE = LIVE + "/og.png?v=4";
+const IMAGE = LIVE + "/og.png";
 const SITE_TITLE = "Stint \u2014 the penny story";
 const SITE_DESC = "A story anyone can continue. One penny a character. Pay on twenty EVM chains, Bitcoin, or Solana.";
 const IMAGE_ALT = "Stint \u2014 a story anyone can continue";
@@ -70,7 +70,6 @@ function cardMeta(title, desc, canonical, type) {
     "<meta name=\"twitter:title\" content=\"" + esc(clip(title, 70)) + "\"/>",
     "<meta name=\"twitter:description\" content=\"" + esc(clip(desc, 200)) + "\"/>",
     "<meta name=\"twitter:image\" content=\"" + IMAGE + "\"/>",
-    "<meta name=\"twitter:image:src\" content=\"" + IMAGE + "\"/>",
     "<meta name=\"twitter:image:alt\" content=\"" + alt + "\"/>"
   ].join("");
 }
@@ -80,6 +79,7 @@ module.exports = async function handler(req, res) {
   const hash = String(url.searchParams.get("h") || url.searchParams.get("hash") || "").trim();
   const n = parseInt(url.searchParams.get("n") || "", 10);
   const storyOnly = url.searchParams.get("story") === "1";
+  const stamp = "v=5";
 
   const book = readJson("story.json", OPENING);
   const extraFile = readJson("chapters.json", { chapters: [] });
@@ -89,7 +89,7 @@ module.exports = async function handler(req, res) {
 
   let title = SITE_TITLE;
   let desc = SITE_DESC;
-  let canonical = LIVE + "/s";
+  let canonical = LIVE + "/s?" + stamp;
   let target = LIVE + "/";
   let type = "website";
 
@@ -97,7 +97,7 @@ module.exports = async function handler(req, res) {
     type = "article";
     title = "Stint \u2014 the story so far";
     desc = clip((rows[0] && rows[0].text) || SITE_DESC, 160);
-    canonical = LIVE + "/s?story=1";
+    canonical = LIVE + "/s?story=1&" + stamp;
     target = LIVE + "/?view=story";
   } else if (hash || Number.isFinite(n)) {
     let row = null;
@@ -110,7 +110,7 @@ module.exports = async function handler(req, res) {
       title = "Stint \u2014 " + kind + " passage" + named;
       desc = clip(row.text, 180);
       const key = row.hash ? ("h=" + encodeURIComponent(row.hash)) : ("n=" + rows.indexOf(row));
-      canonical = LIVE + "/s?" + key;
+      canonical = LIVE + "/s?" + key + "&" + stamp;
       target = LIVE + "/?" + key;
     }
   }
