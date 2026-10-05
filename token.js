@@ -1,5 +1,5 @@
 (function () {
-  window.stintToken = { symbol: "STINT", contract: "", chainId: 4663, held: false, live: false };
+  window.stintToken = { symbol: "STINT", contract: "0x0a370eE4286b42F6a1F0cE4E500669e03218b11E", chainId: 4663, held: false, live: false };
   function money(n) {
     if (n == null || !Number.isFinite(Number(n))) return "\u2014";
     const v = Number(n);
@@ -17,12 +17,14 @@
     set("stat-mcap", money(s.marketCap));
     set("stat-liq", money(s.liquidityUsd));
     set("stat-vol", money(s.volume24h));
+    set("stat-vol-total", money(s.volumeTotal));
+    set("stat-fees-total", money(s.feesTotal));
+    set("stat-fees-total-line", money(s.feesTotal));
+    set("stat-holder-total", s.feesTotal == null ? "\u2014" : money(Number(s.feesTotal) * 0.9));
     const buys = s.buys24h == null ? null : Number(s.buys24h);
     const sells = s.sells24h == null ? null : Number(s.sells24h);
     set("stat-trades", buys == null && sells == null ? "\u2014" : (buys || 0) + " buys \u00b7 " + (sells || 0) + " sells");
-    const row = document.getElementById("holders-row");
-    if (row) row.hidden = s.holders == null;
-    set("stat-holders", s.holders == null ? "\u2014" : String(s.holders));
+    if (s.holders != null) set("stat-holders", String(s.holders));
     const fees = s.volume24h == null ? null : Number(s.volume24h) * 0.01;
     set("stat-fees", money(fees));
     set("stat-holder-cut", fees == null ? "\u2014" : money(fees * 0.9));
@@ -48,8 +50,18 @@
     window.stintToken.held = window.stintToken.live && window.stintToken.account ? await balanceOf(window.stintToken.account, window.stintToken) : false;
     paintPage();
   }
+  async function loadHolders() {
+    const el = document.getElementById("stat-holders");
+    if (!el || (el.textContent && el.textContent !== "\u2014")) return;
+    try {
+      const token = await fetch("https://robinhoodchain.blockscout.com/api/v2/tokens/" + window.stintToken.contract + "/counters", { headers: { accept: "application/json" } }).then((r) => r.json());
+      const n = token && (token.token_holders_count != null ? token.token_holders_count : token.holders_count);
+      if (n != null) el.textContent = String(n);
+    } catch {}
+  }
   async function loadStats() {
     try { paintStats(await fetch("/api/token-stats?t=" + Date.now(), { cache: "no-store" }).then((r) => r.json())); } catch {}
+    loadHolders();
   }
   function copyCa() {
     const ca = (document.getElementById("token-ca") || {}).textContent || "";
@@ -64,7 +76,7 @@
   async function boot() {
     try {
       const cfg = await fetch("/token.json?t=" + Date.now(), { cache: "no-store" }).then((r) => r.json());
-      window.stintToken.contract = String(cfg.contract || "").trim();
+      window.stintToken.contract = String(cfg.contract || window.stintToken.contract).trim();
       window.stintToken.rpc = cfg.rpc || "";
       window.stintToken.live = /^0x[0-9a-fA-F]{40}$/.test(window.stintToken.contract);
     } catch {}
