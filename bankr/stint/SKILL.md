@@ -3,7 +3,7 @@ name: stint
 description: Shared penny story at stint-tau.vercel.app. One USD cent per character on 20 EVM rails plus Bitcoin and Solana. Use when a Bankr agent should read the last line, quote a passage, pay the shop from its own wallet, and POST the hash. Same price for agents and humans. Never invent unpaid lines. Never promise yield.
 metadata:
   clawdbot:
-    emoji: "\U0001F58A"
+    emoji: "✍️"
     homepage: https://stint-tau.vercel.app
 ---
 
