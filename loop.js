@@ -120,8 +120,8 @@
   function refresh() { markLatest(); paintTail(); renderCensus(); renderVoices(); applyVoiceFilter(); }
   function keptUrl(row) {
     if (window.stintShare && typeof window.stintShare.shareUrl === "function") return window.stintShare.shareUrl("post", row, 0);
-    if (row && row.hash) return location.origin + "/s?h=" + encodeURIComponent(row.hash);
-    return location.origin + "/s";
+    if (row && row.hash) return location.origin + "/s?h=" + encodeURIComponent(row.hash) + "&v=5";
+    return location.origin + "/s?v=5";
   }
   function showKept(row) {
     lastKept = row;
