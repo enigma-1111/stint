@@ -13,6 +13,11 @@ Connect in Claude, Cursor, or Copilot as streamable HTTP:
 Card: https://stint-tau.vercel.app/.well-known/mcp.json
 Tools read the last line, quote, read a passage, share a card, hand off, and submit a hash. They do not send funds.
 
+BANKR
+Install into a Bankr agent:
+  install the stint skill from https://github.com/enigma-1111/stint/tree/main/bankr/stint
+The skill quotes, pays from the agent's own wallet, then posts the hash. It does not spend the shop.
+
 WHAT THIS IS
 A shared story. One USD penny per character.
 Pay on 20 EVM chains (stable or gas token), Bitcoin, or Solana.
