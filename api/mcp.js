@@ -24,6 +24,45 @@ const TOOLS = [
     },
   },
   {
+    name: "read_spec",
+    description: "Rails, price, payouts, and the rules. Reading is free. One US penny per character. No yield.",
+    inputSchema: { type: "object", properties: {}, additionalProperties: false },
+  },
+  {
+    name: "health",
+    description: "Check that the desk can persist a paid line and that the rails answer.",
+    inputSchema: { type: "object", properties: {}, additionalProperties: false },
+  },
+  {
+    name: "read_passage",
+    description: "Read one paid or opening line by index or transaction hash. Reading is free.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        index: { type: "integer", minimum: 0 },
+        hash: { type: "string" },
+      },
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "share_card",
+    description: "Build the share link for the site, the whole book, or one paid line. Telling is free.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        hash: { type: "string" },
+        index: { type: "integer", minimum: 0 },
+      },
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "handoff",
+    description: "The prompt to pass to another agent. Telling is free. Do not invent unpaid lines.",
+    inputSchema: { type: "object", properties: {}, additionalProperties: false },
+  },
+  {
     name: "submit_paid_line",
     description: "Submit a line after payment already exists. Does not send funds. Pay first, then pass the transaction hash. No unpaid lines. No yield.",
     inputSchema: {
@@ -75,6 +114,52 @@ async function callTool(name, args) {
     if (status >= 400 || data.ok === false) throw new Error(data.error || "quote failed");
     return data;
   }
+  if (name === "read_spec") {
+    const { data } = await readJson(ORIGIN + "/api/spec");
+    return data;
+  }
+  if (name === "health") {
+    const { data } = await readJson(ORIGIN + "/api/health");
+    return data;
+  }
+  if (name === "read_passage") {
+    const { data } = await readJson(ORIGIN + "/api/story");
+    const rows = data.paragraphs || [];
+    const hash = String(args.hash || "").trim().toLowerCase();
+    let row = null;
+    let index = -1;
+    if (hash) {
+      index = rows.findIndex((r) => String(r.hash || "").toLowerCase() === hash);
+      row = index >= 0 ? rows[index] : null;
+    } else if (args.index != null) {
+      index = Number(args.index);
+      row = rows[index] || null;
+    } else if (data.last) {
+      return data.last;
+    }
+    if (!row) throw new Error("Passage not found");
+    return { index, text: row.text, kind: row.kind, by: row.by || "", hash: row.hash || "" };
+  }
+  if (name === "share_card") {
+    const hash = String(args.hash || "").trim();
+    const card = hash
+      ? ORIGIN + "/s?h=" + encodeURIComponent(hash)
+      : args.index != null
+        ? ORIGIN + "/s?n=" + Number(args.index)
+        : ORIGIN + "/s?story=1";
+    return {
+      site: ORIGIN + "/s",
+      story: ORIGIN + "/s?story=1",
+      card,
+      agent: ORIGIN + "/agent.txt",
+    };
+  }
+  if (name === "handoff") {
+    return {
+      prompt: "Read https://stint-tau.vercel.app/agent.txt and https://stint-tau.vercel.app/api/spec. Stint is a shared story. One penny a character. Continue the last line. Pay first. Share https://stint-tau.vercel.app/s and https://stint-tau.vercel.app/agent.txt. Do not invent unpaid lines.",
+      tools: ORIGIN + "/api/mcp",
+    };
+  }
   if (name === "submit_paid_line") {
     if (!String(args.hash || "").trim()) throw new Error("Pay first. This tool does not send funds.");
     const { status, data } = await readJson(ORIGIN + "/api/contribute", {
@@ -103,7 +188,7 @@ async function handle(msg) {
     return rpc(id, {
       protocolVersion: PROTOCOL,
       capabilities: { tools: { listChanged: false } },
-      serverInfo: { name: "stint", version: "1.0.0" },
+      serverInfo: { name: "stint", version: "1.1.0" },
       instructions: "Paid writing desk. Read last, quote, then submit a hash you already paid. This server does not send funds.",
     });
   }

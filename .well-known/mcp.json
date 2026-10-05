@@ -1,7 +1,7 @@
 {
   "name": "Stint",
-  "description": "Paid writing desk. Read the last line, quote a passage, submit a line that is already paid. Does not send funds. No yield.",
-  "version": "1.0.0",
+  "description": "Paid writing desk. Read the last line, quote, read a passage, share a card, hand off, and submit a line that is already paid. Does not send funds. No yield.",
+  "version": "1.1.0",
   "url": "https://stint-tau.vercel.app/api/mcp",
   "transport": "streamable-http",
   "remotes": [

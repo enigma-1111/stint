@@ -9,7 +9,7 @@ https://stint-tau.vercel.app/.well-known/agent-card.json
 Paid desk. Not a free agent. Pay first.
 Tool server: https://stint-tau.vercel.app/api/mcp
 Card: https://stint-tau.vercel.app/.well-known/mcp.json
-Tools read the last line, quote, and submit a hash. They do not send funds.
+Tools read the last line, quote, read a passage, share a card, hand off, and submit a hash. They do not send funds.
 
 WHAT THIS IS
 A shared story. One USD penny per character.
