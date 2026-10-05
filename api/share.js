@@ -15,17 +15,17 @@ function readJson(name, fallback) {
     path.join(__dirname, name),
   ];
   for (const p of tries) {
-    try { return JSON.parse(fs.readFileSync(p, "utf8")); } catch { /* next */ }
+    try { return JSON.parse(fs.readFileSync(p, "utf8")); } catch (err) { /* next */ }
   }
   return fallback;
 }
 
 function esc(s) {
   return String(s || "")
-    .replace(/&/g, "&")
-    .replace(/</g, "<")
-    .replace(/>/g, ">")
-    .replace(/"/g, """);
+    .replace(/&/g, "\u0026amp;")
+    .replace(/</g, "\u0026lt;")
+    .replace(/>/g, "\u0026gt;")
+    .replace(/"/g, "\u0026quot;");
 }
 
 function clip(s, n) {
@@ -41,33 +41,38 @@ function label(kind) {
 }
 
 function cardMeta(title, desc, canonical, type) {
-  return "" +
-    "<meta charset=\"utf-8\"/>" +
-    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/>" +
-    "<title>" + esc(title) + "</title>" +
-    "<meta name=\"description\" content=\"" + esc(desc) + "\"/>" +
-    "<link rel=\"canonical\" href=\"" + esc(canonical) + "\"/>" +
-    "<link rel=\"image_src\" href=\"" + IMAGE + "\"/>" +
-    "<meta property=\"og:locale\" content=\"en_US\"/>" +
-    "<meta property=\"og:site_name\" content=\"Stint\"/>" +
-    "<meta property=\"og:type\" content=\"" + esc(type) + "\"/>" +
-    "<meta property=\"og:title\" content=\"" + esc(title) + "\"/>" +
-    "<meta property=\"og:description\" content=\"" + esc(desc) + "\"/>" +
-    "<meta property=\"og:url\" content=\"" + esc(canonical) + "\"/>" +
-    "<meta property=\"og:image\" content=\"" + IMAGE + "\"/>" +
-    "<meta property=\"og:image:secure_url\" content=\"" + IMAGE + "\"/>" +
-    "<meta property=\"og:image:type\" content=\"image/png\"/>" +
-    "<meta property=\"og:image:width\" content=\"1200\"/>" +
-    "<meta property=\"og:image:height\" content=\"630\"/>" +
-    "<meta property=\"og:image:alt\" content=\"" + IMAGE_ALT + "\"/>" +
-    "<meta name=\"twitter:card\" content=\"summary_large_image\"/>" +
-    "<meta name=\"twitter:site\" content=\"@nft_Art\"/>" +
-    "<meta name=\"twitter:creator\" content=\"@nft_Art\"/>" +
-    "<meta name=\"twitter:title\" content=\"" + esc(clip(title, 70)) + "\"/>" +
-    "<meta name=\"twitter:description\" content=\"" + esc(clip(desc, 200)) + "\"/>" +
-    "<meta name=\"twitter:image\" content=\"" + IMAGE + "\"/>" +
-    "<meta name=\"twitter:image:src\" content=\"" + IMAGE + "\"/>" +
-    "<meta name=\"twitter:image:alt\" content=\"" + IMAGE_ALT + "\"/>";
+  const t = esc(title);
+  const d = esc(desc);
+  const c = esc(canonical);
+  const alt = esc(IMAGE_ALT);
+  return [
+    "<meta charset=\"utf-8\"/>",
+    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/>",
+    "<title>" + t + "</title>",
+    "<meta name=\"description\" content=\"" + d + "\"/>",
+    "<link rel=\"canonical\" href=\"" + c + "\"/>",
+    "<link rel=\"image_src\" href=\"" + IMAGE + "\"/>",
+    "<meta property=\"og:locale\" content=\"en_US\"/>",
+    "<meta property=\"og:site_name\" content=\"Stint\"/>",
+    "<meta property=\"og:type\" content=\"" + esc(type) + "\"/>",
+    "<meta property=\"og:title\" content=\"" + t + "\"/>",
+    "<meta property=\"og:description\" content=\"" + d + "\"/>",
+    "<meta property=\"og:url\" content=\"" + c + "\"/>",
+    "<meta property=\"og:image\" content=\"" + IMAGE + "\"/>",
+    "<meta property=\"og:image:secure_url\" content=\"" + IMAGE + "\"/>",
+    "<meta property=\"og:image:type\" content=\"image/png\"/>",
+    "<meta property=\"og:image:width\" content=\"1200\"/>",
+    "<meta property=\"og:image:height\" content=\"630\"/>",
+    "<meta property=\"og:image:alt\" content=\"" + alt + "\"/>",
+    "<meta name=\"twitter:card\" content=\"summary_large_image\"/>",
+    "<meta name=\"twitter:site\" content=\"@nft_Art\"/>",
+    "<meta name=\"twitter:creator\" content=\"@nft_Art\"/>",
+    "<meta name=\"twitter:title\" content=\"" + esc(clip(title, 70)) + "\"/>",
+    "<meta name=\"twitter:description\" content=\"" + esc(clip(desc, 200)) + "\"/>",
+    "<meta name=\"twitter:image\" content=\"" + IMAGE + "\"/>",
+    "<meta name=\"twitter:image:src\" content=\"" + IMAGE + "\"/>",
+    "<meta name=\"twitter:image:alt\" content=\"" + alt + "\"/>"
+  ].join("");
 }
 
 module.exports = async function handler(req, res) {
@@ -113,7 +118,7 @@ module.exports = async function handler(req, res) {
   const html = "<!DOCTYPE html><html lang=\"en\"><head>" +
     cardMeta(title, desc, canonical, type) +
     "</head><body style=\"background:#0d0c0a;color:#f3ece0;font:18px/1.5 Georgia,serif;padding:2rem\">" +
-    "<img src=\"" + IMAGE + "\" alt=\"" + IMAGE_ALT + "\" width=\"1200\" height=\"630\"/>" +
+    "<img src=\"" + IMAGE + "\" alt=\"Stint\" width=\"1200\" height=\"630\"/>" +
     "<p>STINT</p><h1>" + esc(title) + "</h1><p>" + esc(desc) + "</p>" +
     "<p><a href=\"" + esc(target) + "\" style=\"color:#e4b86a\">Open on Stint</a></p>" +
     "</body></html>";
