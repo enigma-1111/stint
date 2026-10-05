@@ -3,7 +3,7 @@ const path = require("path");
 const { extras, remoteChapters, mergeBook, OPENING } = require("./lib");
 
 const LIVE = "https://stint-tau.vercel.app";
-const IMAGE = LIVE + "/og.png";
+const IMAGE = LIVE + "/og.png?v=4";
 const SITE_TITLE = "Stint \u2014 the penny story";
 const SITE_DESC = "A story anyone can continue. One penny a character. Pay on twenty EVM chains, Bitcoin, or Solana.";
 const IMAGE_ALT = "Stint \u2014 a story anyone can continue";
@@ -22,10 +22,10 @@ function readJson(name, fallback) {
 
 function esc(s) {
   return String(s || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/&/g, "&")
+    .replace(/</g, "<")
+    .replace(/>/g, ">")
+    .replace(/"/g, """);
 }
 
 function clip(s, n) {
@@ -47,6 +47,7 @@ function cardMeta(title, desc, canonical, type) {
     "<title>" + esc(title) + "</title>" +
     "<meta name=\"description\" content=\"" + esc(desc) + "\"/>" +
     "<link rel=\"canonical\" href=\"" + esc(canonical) + "\"/>" +
+    "<link rel=\"image_src\" href=\"" + IMAGE + "\"/>" +
     "<meta property=\"og:locale\" content=\"en_US\"/>" +
     "<meta property=\"og:site_name\" content=\"Stint\"/>" +
     "<meta property=\"og:type\" content=\"" + esc(type) + "\"/>" +
@@ -65,6 +66,7 @@ function cardMeta(title, desc, canonical, type) {
     "<meta name=\"twitter:title\" content=\"" + esc(clip(title, 70)) + "\"/>" +
     "<meta name=\"twitter:description\" content=\"" + esc(clip(desc, 200)) + "\"/>" +
     "<meta name=\"twitter:image\" content=\"" + IMAGE + "\"/>" +
+    "<meta name=\"twitter:image:src\" content=\"" + IMAGE + "\"/>" +
     "<meta name=\"twitter:image:alt\" content=\"" + IMAGE_ALT + "\"/>";
 }
 
@@ -83,7 +85,6 @@ module.exports = async function handler(req, res) {
   let title = SITE_TITLE;
   let desc = SITE_DESC;
   let canonical = LIVE + "/s";
-  let kind = "";
   let target = LIVE + "/";
   let type = "website";
 
@@ -99,8 +100,9 @@ module.exports = async function handler(req, res) {
     if (!row && Number.isFinite(n) && n >= 0 && n < rows.length) row = rows[n];
     if (row) {
       type = "article";
-      kind = label(row.kind);
-      title = "Stint \u2014 " + kind + " passage";
+      const kind = label(row.kind);
+      const named = row.by && row.by !== "anon" ? " by " + row.by : "";
+      title = "Stint \u2014 " + kind + " passage" + named;
       desc = clip(row.text, 180);
       const key = row.hash ? ("h=" + encodeURIComponent(row.hash)) : ("n=" + rows.indexOf(row));
       canonical = LIVE + "/s?" + key;
@@ -110,13 +112,14 @@ module.exports = async function handler(req, res) {
 
   const html = "<!DOCTYPE html><html lang=\"en\"><head>" +
     cardMeta(title, desc, canonical, type) +
-    "<meta http-equiv=\"refresh\" content=\"0;url=" + esc(target) + "\"/>" +
     "</head><body style=\"background:#0d0c0a;color:#f3ece0;font:18px/1.5 Georgia,serif;padding:2rem\">" +
+    "<img src=\"" + IMAGE + "\" alt=\"" + IMAGE_ALT + "\" width=\"1200\" height=\"630\"/>" +
     "<p>STINT</p><h1>" + esc(title) + "</h1><p>" + esc(desc) + "</p>" +
     "<p><a href=\"" + esc(target) + "\" style=\"color:#e4b86a\">Open on Stint</a></p>" +
     "</body></html>";
 
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=600");
+  res.setHeader("X-Robots-Tag", "all");
   res.status(200).send(html);
 };
