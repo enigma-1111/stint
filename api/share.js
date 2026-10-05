@@ -40,11 +40,6 @@ function label(kind) {
   return "Human";
 }
 
-function isCardBot(req) {
-  const ua = String((req.headers && (req.headers["user-agent"] || req.headers["User-Agent"])) || "");
-  return /twitterbot|facebookexternalhit|facebot|linkedinbot|slackbot|discordbot|telegrambot|whatsapp|pinterest|redditbot|embedly|quora|vkshare|applebot|iframely|preview/i.test(ua);
-}
-
 function cardMeta(title, desc, canonical, type) {
   const t = esc(title);
   const d = esc(desc);
@@ -106,36 +101,31 @@ module.exports = async function handler(req, res) {
     target = LIVE + "/?view=story";
   } else if (hash || Number.isFinite(n)) {
     let row = null;
-    if (hash) row = rows.find((p) => p.hash && p.hash === hash);
-    if (!row && Number.isFinite(n) && n >= 0 && n < rows.length) row = rows[n];
+    let index = -1;
+    if (hash) index = rows.findIndex((p) => p.hash && p.hash === hash);
+    if (index < 0 && Number.isFinite(n) && n >= 0 && n < rows.length) index = n;
+    if (index >= 0) row = rows[index];
     if (row) {
       type = "article";
       const kind = label(row.kind);
       const named = row.by && row.by !== "anon" ? " by " + row.by : "";
       title = "Stint \u2014 " + kind + " passage" + named;
       desc = clip(row.text, 180);
-      const key = row.hash ? ("h=" + encodeURIComponent(row.hash)) : ("n=" + rows.indexOf(row));
+      const key = row.hash ? ("h=" + encodeURIComponent(row.hash)) : ("n=" + index);
       canonical = LIVE + "/s?" + key + "&" + stamp;
       target = LIVE + "/?" + key;
     }
   }
 
-  if (!isCardBot(req)) {
-    res.writeHead(302, { Location: target, "Cache-Control": "no-store" });
-    res.end();
-    return;
-  }
-
   const html = "<!DOCTYPE html><html lang=\"en\"><head>" +
     cardMeta(title, desc, canonical, type) +
+    "<script>location.replace(" + JSON.stringify(target) + ");</script>" +
     "</head><body style=\"background:#0d0c0a;color:#f3ece0;font:18px/1.5 Georgia,serif;padding:2rem\">" +
-    "<img src=\"" + IMAGE + "\" alt=\"Stint\" width=\"1200\" height=\"630\"/>" +
-    "<p>STINT</p><h1>" + esc(title) + "</h1><p>" + esc(desc) + "</p>" +
-    "<p><a href=\"" + esc(target) + "\" style=\"color:#e4b86a\">Open on Stint</a></p>" +
+    "<p><a href=\"" + esc(target) + "\" style=\"color:#e4b86a\">Open this line</a></p>" +
     "</body></html>";
 
   res.setHeader("Content-Type", "text/html; charset=utf-8");
-  res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=600");
+  res.setHeader("Cache-Control", "no-store");
   res.setHeader("X-Robots-Tag", "all");
   res.status(200).send(html);
 };
