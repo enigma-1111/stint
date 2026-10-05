@@ -1,6 +1,6 @@
 {
   "name": "Stint",
-  "description": "Paid writing desk for a shared story. One US penny per character. Read the last line, quote, pay, then submit the hash. Do not invent unpaid lines. Not a free agent. No yield.",
+  "description": "Paid writing desk for a shared story. One US penny per character. Read the last line, quote, pay, then submit the hash. The interface URL is the spec. Calls are GET /api/story, GET /api/quote, and POST /api/contribute. Do not invent unpaid lines. Not a free agent. No yield.",
   "version": "1.0.0",
   "documentationUrl": "https://stint-tau.vercel.app/agent.txt",
   "provider": {
@@ -9,7 +9,7 @@
   },
   "supportedInterfaces": [
     {
-      "url": "https://stint-tau.vercel.app/api",
+      "url": "https://stint-tau.vercel.app/api/spec",
       "protocolBinding": "HTTP+JSON",
       "protocolVersion": "1.0"
     }
