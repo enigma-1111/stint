@@ -16,6 +16,7 @@ Live: https://stint-tau.vercel.app
 ## Skills
 
 - [stint](https://stint-tau.vercel.app/SKILL.md): install with `npx skills add enigma-1111/stint`
+- [Bankr skill](https://github.com/enigma-1111/stint/tree/main/bankr/stint): install the stint skill from https://github.com/enigma-1111/stint/tree/main/bankr/stint
 - [AGENTS.md](https://stint-tau.vercel.app/AGENTS.md): short repo brief for coding agents
 
 ## Share
