@@ -251,7 +251,7 @@ function getAsset(chain, symbol) {
   }
   const tok = chain.tokens && chain.tokens[s];
   if (!tok) return null;
-  return { kind: chain.family === "solana" ? "spl" : "erc20", symbol: s, decimals: tok.decimals, stable: !!tok.stable, address: tok.address || "", mint: tok.mint || "" };
+  return { kind: chain.family === "solana" ? "spl" : "erc20", symbol: s, decimals: tok.decimals, stable: !!tok.stable, priceId: tok.priceId || "", address: tok.address || "", mint: tok.mint || "" };
 }
 
 function usdDue(chars) {
