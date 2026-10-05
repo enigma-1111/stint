@@ -1,0 +1,17 @@
+name: desk
+on:
+  push:
+    branches: [main]
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: wait for Vercel
+        run: sleep 50
+      - name: health and STINT quote
+        run: |
+          curl -fsS https://stint-tau.vercel.app/api/health
+          echo
+          curl -fsS "https://stint-tau.vercel.app/api/quote?chars=100&rail=robinhood&asset=STINT" | grep -q '"ok":true'
+          echo
+          echo desk ok

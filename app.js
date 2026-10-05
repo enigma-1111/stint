@@ -303,6 +303,12 @@ function fillAssets() {
   paintWallet();
   refreshMeter();
 }
+function unitsOf(q) {
+  if (!q || q.units == null || q.decimals == null) return "";
+  const n = Number(q.units) / Math.pow(10, q.decimals);
+  if (!Number.isFinite(n) || n <= 0) return "";
+  return n >= 100 ? n.toLocaleString("en-US", { maximumFractionDigits: 2 }) : n.toPrecision(4);
+}
 async function refreshMeter() {
   const n = charsOf($("line").value);
   const usd = (n * PENNY).toFixed(2);
@@ -311,11 +317,20 @@ async function refreshMeter() {
     return;
   }
   try {
-    const q = await fetchJson("/api/quote?chars=" + n + "&rail=" + encodeURIComponent(selectedRail()) + "&asset=" + encodeURIComponent(selectedAsset()));
-    const shown = q.units && q.decimals != null
-      ? (Number(q.units) / Math.pow(10, q.decimals)).toPrecision(6)
-      : usd;
-    $("meter").textContent = n + " characters \u00b7 $" + usd + " \u00b7 " + shown + " " + (q.asset || selectedAsset());
+    const rail = selectedRail();
+    const asset = selectedAsset();
+    const q = await fetchJson("/api/quote?chars=" + n + "&rail=" + encodeURIComponent(rail) + "&asset=" + encodeURIComponent(asset));
+    const shown = unitsOf(q);
+    let line = n + " characters \u00b7 $" + usd;
+    if (shown) line += " \u00b7 " + shown + " " + (q.asset || asset);
+    if (asset !== "STINT") {
+      try {
+        const s = await fetchJson("/api/quote?chars=" + n + "&rail=robinhood&asset=STINT");
+        const st = unitsOf(s);
+        if (st) line += " \u00b7 or " + st + " STINT";
+      } catch {}
+    }
+    $("meter").textContent = line;
   } catch {
     $("meter").textContent = n + " characters \u00b7 $" + usd;
   }

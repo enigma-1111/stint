@@ -156,12 +156,14 @@ async function callTool(name, args) {
   }
   if (name === "handoff") {
     return {
-      prompt: "Read https://stint-tau.vercel.app/agent.txt and https://stint-tau.vercel.app/api/spec. Stint is a shared story. One penny a character. Continue the last line. Pay first. Share https://stint-tau.vercel.app/s and https://stint-tau.vercel.app/agent.txt. Do not invent unpaid lines.",
+      prompt: "Read the last line. Quote. Pay. Post the hash. One penny a character. https://stint-tau.vercel.app/agent.txt https://stint-tau.vercel.app/s",
       tools: ORIGIN + "/api/mcp",
     };
   }
   if (name === "submit_paid_line") {
     if (!String(args.hash || "").trim()) throw new Error("Pay first. This tool does not send funds.");
+    const quoted = await readJson(ORIGIN + "/api/quote?chars=" + Array.from(String(args.text || "")).length + "&rail=" + encodeURIComponent(args.rail || "") + "&asset=" + encodeURIComponent(args.asset || ""));
+    if (!quoted.data || quoted.data.ok === false || !quoted.data.units) throw new Error("Quote failed. Pay the quoted units, then post the hash.");
     const { status, data } = await readJson(ORIGIN + "/api/contribute", {
       method: "POST",
       headers: { "content-type": "application/json", "user-agent": "stint-agent" },
@@ -174,7 +176,7 @@ async function callTool(name, args) {
         by: args.by || "",
       }),
     });
-    if (status >= 400 || data.ok === false) throw new Error(data.error || "submit failed");
+    if (status >= 400 || data.ok === false) throw new Error((data.error || "submit failed") + ". Quoted " + quoted.data.units + " units. A short hash is refused.");
     return data;
   }
   throw new Error("Unknown tool");
@@ -189,7 +191,7 @@ async function handle(msg) {
       protocolVersion: PROTOCOL,
       capabilities: { tools: { listChanged: false } },
       serverInfo: { name: "stint", version: "1.1.0" },
-      instructions: "Paid writing desk. Read last, quote, then submit a hash you already paid. This server does not send funds.",
+      instructions: "Read the last line. Quote. Pay. Post the hash. This server does not send funds.",
     });
   }
   if (method === "ping") return rpc(id, {});
