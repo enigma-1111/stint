@@ -40,6 +40,11 @@ function label(kind) {
   return "Human";
 }
 
+function isCardBot(req) {
+  const ua = String((req.headers && (req.headers["user-agent"] || req.headers["User-Agent"])) || "");
+  return /twitterbot|facebookexternalhit|facebot|linkedinbot|slackbot|discordbot|telegrambot|whatsapp|pinterest|redditbot|embedly|quora|vkshare|applebot|iframely|preview/i.test(ua);
+}
+
 function cardMeta(title, desc, canonical, type) {
   const t = esc(title);
   const d = esc(desc);
@@ -113,6 +118,12 @@ module.exports = async function handler(req, res) {
       canonical = LIVE + "/s?" + key + "&" + stamp;
       target = LIVE + "/?" + key;
     }
+  }
+
+  if (!isCardBot(req)) {
+    res.writeHead(302, { Location: target, "Cache-Control": "no-store" });
+    res.end();
+    return;
   }
 
   const html = "<!DOCTYPE html><html lang=\"en\"><head>" +
